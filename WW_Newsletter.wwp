@@ -1,0 +1,748 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : WW_Newsletter
+ major_version : 28
+ minor_version : 0
+ type : 4097
+ description : ""
+ subtype : 0
+project :
+ identifier : 0x0
+ internal_properties : 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
+ configurations :
+  -
+    name : Site
+    internal_properties : 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
+    configuration_id : 18232568064264802220
+    type : 2
+    generation_name : WW_Newsletter.wdl
+    version : {}
+    language : 2
+    64bits : true
+ elements :
+  identifier : 0x41e6cbb600024e22
+  elements :
+   -
+     name : PAGETPL_PublicSite
+     identifier : 0x423c51f701795ee9
+     internal_properties : CAAAAAgAAACY9kBcaxAYw5rCZ1RKMEX7rh2lbV4wPYqW9D0caNjEXKQOHO65DE5P51NNq2tlHZN9hQ==
+     physical_name : .\PAGETPL_PublicSite.wwt
+     type : 65541
+   -
+     name : COL_TOOLS
+     identifier : 0x41e7e1bd01255bad
+     internal_properties : CAAAAAgAAABUMrz4x7z0916GK5gO9Qk3Fmd9FajCqUuoDByFl4mLpW9X16P1yAKDKxeBfwf5gXdBwQ==
+     physical_name : .\COL_TOOLS.wdg
+     type : 7
+   -
+     name : SET_BRW_TOOLS
+     identifier : 0x41e7e1c8012786e3
+     internal_properties : CAAAAAgAAADXsz9jQD11dt83UCHHv8QCPX54uB8BUXtdYNi5ebdfQYd1n2s8gbk4nJgC/oZ6BvrCQg==
+     physical_name : .\SET_BRW_TOOLS.wwn
+     type : 65539
+   -
+     name : SET_NLLIST
+     identifier : 0x41ee5144001b0835
+     internal_properties : CAAAAAgAAABdObVpVgMrNJnFal9NPrr8t/r2LqOVY22sb6ko7iLoyAzwHO6+B0NC6lZAuHhoEIBIyA==
+     physical_name : .\SET_NLLIST.wdg
+     type : 7
+   -
+     name : QRY_NewsletterList
+     identifier : 0x423c58fd018fcfb0
+     internal_properties : CAAAAAgAAAAVcX2hHnszbHFtgvc1l94oeyiGbkRgHnujR0ib/GevQbMtw0dWr+vqQv74wECwSLgAAA==
+     physical_name : .\QRY_NewsletterList.WDR
+     type : 5
+   -
+     name : QRY_ListSubscribersCount
+     identifier : 0x421dbbed01b5cf72
+     internal_properties : CAAAAAgAAADySCp+zbryLQB8leYEh88pdDWDa1EtXgyi1oLhOFuxR7kpwVlHvvz9Uc03gQH/++3XXw==
+     physical_name : .\QRY_ListSubscribersCount.WDR
+     type : 5
+   -
+     name : registration
+     identifier : 0x423c527b018a642e
+     internal_properties : CAAAAAgAAADsasTQ75ScTxZO49DWoiXran1p+V5oYL2xa9OOlmqqJpJY+oAtkMrLY9/ZJ+/hmQ/5eQ==
+     physical_name : .\registration.wwh
+     type : 65538
+   -
+     name : QRY_Users
+     identifier : 0x421f5ed900293b36
+     internal_properties : CAAAAAgAAAAzD2u/jPmx6sM7VCX7iEj2XSiU9LyImW13gi8056xuinZa1iSIfb08kIx2QsI+Oq4WHg==
+     physical_name : .\QRY_Users.WDR
+     type : 5
+   -
+     name : SET_NLUSER
+     identifier : 0x421f673e002b08cc
+     internal_properties : CAAAAAgAAADySCp+zbryLQB8leYEyp9R6K8370DKk5G5IcfSVto65h4wPlxHvvz9Uc03gQH/++3XXw==
+     physical_name : .\SET_NLUSER.wdg
+     type : 7
+   -
+     name : TPLC_Registration
+     identifier : 0x423c68a50191f61c
+     internal_properties : CAAAAAgAAAB00lxYZ9xUV35mi/gu3alnFjdtNfhyBgFWBGwt7zFjjae/T0tVqOLjS/fh36dZIZdh4Q==
+     physical_name : .\TPLC_Registration.wwt
+     type : 65543
+   -
+     name : SET_NLEMAIL
+     identifier : 0x4240124a003fb021
+     internal_properties : CAAAAAgAAADYtoCcK1DYg1qCJ5QKOjl/LmENPQIUhqKsB3veFhpyplrwYrj5zA6PJxONayulXVO9RQ==
+     physical_name : .\SET_NLEMAIL.wdg
+     type : 7
+   -
+     name : confirm
+     identifier : 0x42401e130041b820
+     internal_properties : CAAAAAgAAACloY2RLkvj/EG90qdFDtIUL2IOJhsdWUtVYrnYDhJ4qFzwfJ4G/zu6Eg6IcDCgWEiwsA==
+     physical_name : .\confirm.wwh
+     type : 65538
+   -
+     name : QRY_FindEmail
+     identifier : 0x42403deb00431ece
+     internal_properties : CAAAAAgAAACMiuQwD7T8LzYuQzD2iEH3WhkRCc3phUavxNFSW0hMrGxW1CaNcKorg785hw/BuS+ZmQ==
+     physical_name : .\QRY_FindEmail.WDR
+     type : 5
+   -
+     name : TPLC_Confirm
+     identifier : 0x42404f3b002fbe83
+     internal_properties : CAAAAAgAAAB82lRAfySMn6bec0CmWRHHDn91LZCCgIVWwKjpM+0niUuro9fdIFpb8y+pF59RKZ9p6Q==
+     physical_name : .\TPLC_Confirm.wwt
+     type : 65543
+   -
+     name : PAGETPL_Management
+     identifier : 0x42405130003164c3
+     internal_properties : CAAAAAgAAAByyKr+TTpyrYD8FWaEQAPNEEO/J3Q2H9mydfHomHikrAiGqOLHPnx90U23AYF/e21X3w==
+     physical_name : .\PAGETPL_Management.wwt
+     type : 65541
+   -
+     name : PAGE_Dashboard
+     identifier : 0x424051410033a556
+     internal_properties : CAAAAAgAAADrZ9M39LH5IjsjTD3jaHCexYCcnBFTQBqpzbPuBAwOOvYKBgSgZaUkiLQuigrGsibudg==
+     physical_name : .\PAGE_Dashboard.wwh
+     type : 65538
+   -
+     name : QRY_UserSubscriptions
+     identifier : 0x424066cc0035cc20
+     internal_properties : CAAAAAgAAADGTC5yse7G6cw4QTLwnkvVtNuDS+ebi76nJr+s7ab2MtpkyjCLcqgpjYlzTdUL9+nTUw==
+     physical_name : .\QRY_UserSubscriptions.WDR
+     type : 5
+   -
+     name : profile
+     identifier : 0x42414b3c0037274d
+     internal_properties : CAAAAAgAAABWPL7iwb72+VyI0aJAT3uFQBFPB7qcVHrp1XZjlWupZ5GR+QG7Aji5HRmDfQX7h3lDww==
+     physical_name : .\profile.wwh
+     type : 65538
+   -
+     name : identification
+     identifier : 0x42414e8b003910a9
+     internal_properties : CAAAAAgAAADnY8/T0I2lRm+HIJEXPzTSbS5oCM/xR31dQCB5mXefoae1v8vs0QmILOjSLvbqlgrycg==
+     physical_name : .\identification.wwh
+     type : 65538
+   -
+     name : TPLC_Identification
+     identifier : 0x42416252003b553d
+     internal_properties : CAAAAAgAAABp5VG1ci+HqI35DnOhIh4oSw5KEqfZQHK+ioUUco6EhIiUmOLaI2dmzkq0DJRMNKRs9A==
+     physical_name : .\TPLC_Identification.wwt
+     type : 65543
+   -
+     name : reinitialization
+     identifier : 0x42416284003d166a
+     internal_properties : CAAAAAgAAACTb8vf7FnRiqPbdEVbdWSSUe6kBKexK8C9FOrvq3WZT+Fz+RGoHV1c8CyWYiLemg72fg==
+     physical_name : .\reinitialization.wwh
+     type : 65538
+   -
+     name : TPLC_Reinitialization
+     identifier : 0x424162d1003f444b
+     internal_properties : CAAAAAgAAACxjek9Crf/MDVxlps5zIJE+4rC6tNdBTZWxEtOyEhC9gYeLmxCu//+VsI8hAzEvCyUnA==
+     physical_name : .\TPLC_Reinitialization.wwt
+     type : 65543
+   -
+     name : TPLC_Profile
+     identifier : 0x42416ef50041b03f
+     internal_properties : CAAAAAgAAAAkIgwol8xkBy5W+8je6u0jEmVhoRZwAnOKH+u2XtJC3iqQgoglmNLTe6cR77cp0ccxMQ==
+     physical_name : .\TPLC_Profile.wwt
+     type : 65543
+   -
+     name : unregister
+     identifier : 0x42416f8c0043fd8b
+     internal_properties : CAAAAAgAAAB10V1BfttTDNENoheVisJcL3Iupht1jl2yTeW0co6MRPB80Dp2T4sKop4Y4KBQKJhg4A==
+     physical_name : .\unregister.wwh
+     type : 65538
+   -
+     name : TPLC_Unregistration
+     identifier : 0x4241811500457ddb
+     internal_properties : CAAAAAgAAAAVcX2hHnszbHFtgvc1qy7AO7jGnhEbUkO2LCBxlXubZZ9RP1tWr+vqQv74wECwSLgAAA==
+     physical_name : .\TPLC_Unregistration.wwt
+     type : 65543
+   -
+     name : newsletter
+     identifier : 0x424186de004717ee
+     internal_properties : CAAAAAgAAAD2XN7C4V7W2fzosQLgd9t14IG/J4rMBCvqGw6L7RMBz2mZ8SmbYpgZvXljXSXbpxnjYw==
+     physical_name : .\newsletter.wwh
+     type : 65538
+   -
+     name : PAGE_Configuration
+     identifier : 0x4241a9f3004d22b1
+     internal_properties : CAAAAAgAAADeRDbq2YauQQRA+crY8HeBZHcD69iSKYe2TIHQIMDUJNgWeJIjmtDRZdHLNf3zjwHLSw==
+     physical_name : .\PAGE_Configuration.wwh
+     type : 65538
+   -
+     name : PAGE_Identification
+     identifier : 0x42419cd0004bd219
+     internal_properties : CAAAAAgAAABGzK7yMW5GaUy4wbJwGU/pQN1/9z4A9emSMTRls123CT/zX7sL8iipDQnzzVWLd2lT0w==
+     physical_name : .\PAGE_Identification.wwh
+     type : 65538
+   -
+     name : PAGE_ManageAttributes
+     identifier : 0x4241b7e8004fa911
+     internal_properties : CAAAAAgAAAD8WtTA/6QMHyZe88AmqJGn6qnh+Vp0Buqyha3sGOgsLCw2FGZdoNrbc68plx/RqR/paQ==
+     physical_name : .\PAGE_ManageAttributes.wwh
+     type : 65538
+   -
+     name : PAGE_ManageUsers
+     identifier : 0x4242f0af004f74ab
+     internal_properties : CAAAAAgAAADCuDpuXQoiPZDMZVZUT3+JRBWju544zdmuDn4bTaPpb5GR+QG3DkxN4V1HsXFvC/3HTw==
+     physical_name : .\PAGE_ManageUsers.wwh
+     type : 65538
+   -
+     name : QRY_ViewUser
+     identifier : 0x4243105f00523b31
+     internal_properties : CAAAAAgAAADBvTltWgcvwIXBZktJRXaYx4CCkpzoYE9IDpqJhg0JN/ULBQWyC09O5lJMtHx0DPzETA==
+     physical_name : .\QRY_ViewUser.WDR
+     type : 5
+   -
+     name : TPLC_ADMIN_SimpleStats
+     identifier : 0x424317720055dd2b
+     internal_properties : CAAAAAgAAABAPrjkw7jwKwJ6j/wihzE/IkfhcbCyRmey6SK/Nds5h6VZNVVhpObnT8s1gwP9hXtFzQ==
+     physical_name : .\TPLC_ADMIN_SimpleStats.wwt
+     type : 65543
+   -
+     name : QRY_CountEmailInStatus
+     identifier : 0x424318d103f7391d
+     internal_properties : CAAAAAgAAAA0EhwYp5yUl76my7hu9GnXcgE50VVJ0GZWPbWuz6TwyHCS2KIV6CKjCzehH+cZ4dchIQ==
+     physical_name : .\QRY_CountEmailInStatus.WDR
+     type : 5
+   -
+     name : PAGE_ManageList
+     identifier : 0x42442d7d0056fda1
+     internal_properties : CAAAAAgAAABv60dbaBUdzpcfSDnvduhW8YC4UGHLOZRWCMWc7iJwSPAQWCKUaaEgtGBapm5iHpJ6+g==
+     physical_name : .\PAGE_ManageList.wwh
+     type : 65538
+   -
+     name : PAGE_ImportUsers
+     identifier : 0x42442dbb0058ee79
+     internal_properties : CAAAAAgAAABKwLJWVRIaxZjEbV5MXPv9eHs37+yWzf+y2VVETMTIaOwSfA6/BkRF6VVPqWlnE4VP1w==
+     physical_name : .\PAGE_ImportUsers.wwh
+     type : 65538
+   -
+     name : PAGE_ManageNewsletters
+     identifier : 0x42442df0005abfa4
+     internal_properties : CAAAAAgAAABZNQEFop+XmL2pfkNRQu7YW96aArfpViFVhqX0Mu4kxEj0WCKqE1dW/jqkHOQc5NQ8xA==
+     physical_name : .\PAGE_ManageNewsletters.wwh
+     type : 65538
+   -
+     name : PAGE_ManageQueue
+     identifier : 0x42442e2b005ca428
+     internal_properties : CAAAAAgAAAAEAmxIdyyEp472G2i+WImfgpG5MfJ8yM2Vtn0ceJj8zHy2lPbFOHJz20exD5dJMacREQ==
+     physical_name : .\PAGE_ManageQueue.wwh
+     type : 65538
+   -
+     name : QRY_UserAttribute
+     identifier : 0x4244504d005ff9b4
+     internal_properties : CAAAAAgAAADOVCZ6yfa+8fQwaVpIS/MVaHk3v/WRBZWOnx4NbBd9U+UdDQ2zCkBBlYF7Rc0D//HbWw==
+     physical_name : .\QRY_UserAttribute.WDR
+     type : 5
+   -
+     name : TPLC_ListProperty
+     identifier : 0x42459cb11514647a
+     internal_properties : CAAAAAgAAAAkIgwol8xkBy5W+8je+m2DciVBAbaQoDm+ctuGDuIy7hogcpglmNLTe6cR77cp0ccxMQ==
+     physical_name : .\TPLC_ListProperty.wwt
+     type : 65543
+   -
+     name : TPLC_ComboLists
+     identifier : 0x4245b6ad0064e622
+     internal_properties : CAAAAAgAAACIhvCsG0Do88oyVyT6t4l3mq/ZSQgasuvqe6ov1UvJJ9V5NUWJfL4/l4N9ezu1TUONlQ==
+     physical_name : .\TPLC_ComboLists.wwt
+     type : 65543
+   -
+     name : PAGE_ManageNLTemplates
+     identifier : 0x4249342300660832
+     internal_properties : CAAAAAgAAABo5lBMeyCIk6rSd0RaiLWbHn1lvf6wECGxp4UUkJCMdEym5CapHF5f9yOdG5tVLaNt9Q==
+     physical_name : .\PAGE_ManageNLTemplates.wwh
+     type : 65538
+   -
+     name : PAGE_ManageImages
+     identifier : 0x4249343a006860d1
+     internal_properties : CAAAAAgAAADfuzfr2IWtvgdP+MnfDjg2IaD4oAFLRgJVwqX0tnqYAPjIgJokmdHQZNDKNv7yjgLKSg==
+     physical_name : .\PAGE_ManageImages.wwh
+     type : 65538
+   -
+     name : SET_NLMESSAGE
+     identifier : 0x424939fb008ada7b
+     internal_properties : CAAAAAgAAACPi+c7CLX9Ljd/qBmP34wK5dZAYEcZ+eNdINj56TdfUacFT0t0SYEAVMA6hg7CvjKamg==
+     physical_name : .\SET_NLMESSAGE.wdg
+     type : 7
+   -
+     name : SET_NLLOG
+     identifier : 0x424af6ba2150f669
+     internal_properties : CAAAAAgAAADeRDbq2YauQQRA+crYATchiIXX39boCNvolPStW6Xv4dcrZ6MjmtDRZdHLNf3zjwHLSw==
+     physical_name : .\SET_NLLOG.wdg
+     type : 7
+   -
+     name : TPLC_SelectorAttributes
+     identifier : 0x424beaba0081cb0c
+     internal_properties : CAAAAAgAAAAYdsDc65CYQxpC59TKHDWzXu2FHb6YvcXqm/GofLRY+Bg6cJo5jM7PZ9PNK+vlnRP9BQ==
+     physical_name : .\TPLC_SelectorAttributes.wwt
+     type : 65543
+   -
+     name : QRY_ListNLByStatus
+     identifier : 0x424bf1d500838e9a
+     internal_properties : CAAAAAgAAACzj+s/DHkxakO71KV7LgQCDbz0LCAcgIVfGJlK0cJI6GiIwMoI/T28EAz2wkK+ui6Wng==
+     physical_name : .\QRY_ListNLByStatus.WDR
+     type : 5
+   -
+     name : SET_NLATTACH
+     identifier : 0x424c18ef00854e43
+     internal_properties : CAAAAAgAAAA6EGKmBULq9cg0XS78qPsVCBtHnxxOcW+84yGwoEDcJMB+0EqPdrQ1mYV/eTm3Q7UfJw==
+     physical_name : .\SET_NLATTACH.wdg
+     type : 7
+   -
+     name : QRY_ListAttachFamily
+     identifier : 0x424c36e500a65567
+     internal_properties : CAAAAAgAAAANCWW5BnM7ZEm12q99OgqEF2pWTvZyC8q3OnnihR58ZECc0MoO9zOyGgbwyEi4QLAYGA==
+     physical_name : .\QRY_ListAttachFamily.WDR
+     type : 5
+   -
+     name : viewimage
+     identifier : 0x424c548400a80b40
+     internal_properties : CAAAAAgAAAAYdsDc65CYQxpC59TK4MUbDh0Fzf6QkNy5+c2MeIgUjHS+bJ45jM7PZ9PNK+vlnRP9BQ==
+     physical_name : .\viewimage.wwh
+     type : 65538
+   -
+     name : PAGE_TestAddresses
+     identifier : 0x424d28170076854f
+     internal_properties : CAAAAAgAAADmbM7S0Y6mSWyYIZIQX2s1UMFfd8rsmBe9yF5zZbtZV6FhifHr0giJLenTLfXrlwnzcw==
+     physical_name : .\PAGE_TestAddresses.wwh
+     type : 65538
+   -
+     name : PAGE_ViewLog
+     identifier : 0x424d80760079bc2e
+     internal_properties : CAAAAAgAAAAacMLG5aIKFShU/c7cHCsN6Ovnf1wGMNWVMtXELMTICMwSXK4vltTVeaUfmRnXoxX/Bw==
+     physical_name : .\PAGE_ViewLog.wwh
+     type : 65538
+   -
+     name : QRY_ReadLog
+     identifier : 0x424d82f6007b7c61
+     internal_properties : CAAAAAgAAAAwDmi0cyiAm7Kqf0xSm0GnMhdh8VsPzei3cspRNE9Fi3G98RmxFFZX/zulE5NNNasVHQ==
+     physical_name : .\QRY_ReadLog.WDR
+     type : 5
+   -
+     name : QRY_FindUserByAttribute
+     identifier : 0x424d984c00f7d5d8
+     internal_properties : CAAAAAgAAADudMba6ZaeURSQybpoOhMV7ONLY9+bzcWD/+M4cTJaTr4QXrwT6iChNeHbJe3jnxH7ew==
+     physical_name : .\QRY_FindUserByAttribute.WDR
+     type : 5
+   -
+     name : QRY_StatusOutgoingQueue
+     identifier : 0x424e88060635482d
+     internal_properties : CAAAAAgAAABi2FpOfSqCnbCsxbZ0Bx8ZhIXT22E9VQiKdDohGJvx59kpYbkX7iytAT2nEZFPK51n7w==
+     physical_name : .\QRY_StatusOutgoingQueue.WDR
+     type : 5
+   -
+     name : PAGETPL_EditRoughText
+     identifier : 0x424ed2520081837e
+     internal_properties : CAAAAAgAAAA0EhwYp5yUl76my7huOh0TIlXxEaaA2GS+CtuGbqJyTvogUrgV6CKjCzehH+cZ4dchIQ==
+     physical_name : .\PAGETPL_EditRoughText.wwt
+     type : 65541
+   -
+     name : PAGETPL_EditHTMLText
+     identifier : 0x424edd160083902b
+     internal_properties : CAAAAAgAAAAuNAYaqdZeEdRQifoozee52EUnLxawLqSW+FAJj2EzrRvnC39TquDhdaEb5a0j39E7Ow==
+     physical_name : .\PAGETPL_EditHTMLText.wwt
+     type : 65541
+   -
+     name : QRY_CountMessageInStatus
+     identifier : 0x4257c0d1008435fb
+     internal_properties : CAAAAAgAAACd+fWpFkPr9FmFKp8NMwbIE1CuNgyQChh2hRQXAIOTnReJp+P+xwOCKhaAeDioUECIiA==
+     physical_name : .\QRY_CountMessageInStatus.WDR
+     type : 5
+   -
+     name : QRY_ListNLAccordingToPeriod
+     identifier : 0x4258263000d2348c
+     internal_properties : CAAAAAgAAADEQiwIt+zE5842Wyj+vZl3BmddhTNHPjd/ILhrUlFDzSefT0uFeLIzm4dxT9cJ8efRUQ==
+     physical_name : .\QRY_ListNLAccordingToPeriod.WDR
+     type : 5
+   -
+     name : TPLC_TemplateProperty
+     identifier : 0x42cfd19101126b4f
+     internal_properties : CAAAAAgAAABg3lhEY9hQCyJb8bVuusIknPP7M3QGBGC2HN+6foKKfk6g7wz1zBXIb6sV46NdJZtl7Q==
+     physical_name : .\TPLC_TemplateProperty.wwt
+     type : 65543
+   -
+     name : TPLC_ImagePicker
+     identifier : 0x42d51167029ad846
+     internal_properties : CAAAAAgAAAAdeXUplsNrdNnsIK4ucTpWsfD4oBEDa62qI+noMu4khESstCSLtwAhqpYA+Lgo0MAICA==
+     physical_name : .\TPLC_ImagePicker.wwt
+     type : 65543
+   -
+     name : PAGE_Dlg_ImagePicker
+     identifier : 0x42d52039029db9e6
+     internal_properties : CAAAAAgAAADoZtDM+6AIEyo5HF3ts95pTG8bw+Cim++1DtWMxCxosEyCZEVrVzL+d6MdmxvVrSPtdQ==
+     physical_name : .\PAGE_Dlg_ImagePicker.wwh
+     type : 65538
+   -
+     name : QRY_FindAttribute
+     identifier : 0x42d6ad740a6fbf06
+     internal_properties : CAAAAAgAAADZtYGFIh8XGD0xirUGZmmSDVwEzGBkmW5LqT0ubSZ0rFTcBMuReevefroknGScZFS8RA==
+     physical_name : .\QRY_FindAttribute.WDR
+     type : 5
+   -
+     name : QRY_FindQueueByStatus
+     identifier : 0x42d6b0a8009440de
+     internal_properties : CAAAAAgAAAC3k5+DIB0VFj8/j+Mg/0zcVzSiCrDMOxOD/5yPCIsD9ccZ51k0lOTgfLginmaaZlqiog==
+     physical_name : .\QRY_FindQueueByStatus.WDR
+     type : 5
+   -
+     name : PAGE_Test
+     identifier : 0x42d80c700bf4cbfa
+     internal_properties : CAAAAAgAAAAoJhAMu+DI0+r8LqIGIp4TRjmVlSqsHDexV/PmnmKqHpJoVuUOxQsht2NdW9sV7eMtNQ==
+     physical_name : .\PAGE_Test.wwh
+     type : 65538
+   -
+     name : QRY_NextScheduling
+     identifier : 0x42ea7fc2009c8a40
+     internal_properties : CAAAAAgAAAAuNAYaqdZeEdRMXwo/hkWFes85adOv6lyrkc4diAuJpxX5Z6MI+Mr9daEb5a0j39E7Ow==
+     physical_name : .\QRY_NextScheduling.WDR
+     type : 5
+   -
+     name : QRY_CountRegisteredUsers
+     identifier : 0x42eb73b4009e7536
+     internal_properties : CAAAAAgAAAAXc3+jAH01Np8UfHEqoysSJbQcRAh0hB5SGnniSVow8NAQINW2QsK13FhCvka6RroCAg==
+     physical_name : .\QRY_CountRegisteredUsers.WDR
+     type : 5
+   -
+     name : QRY_DetailsNewsletterQueue
+     identifier : 0x42eb844500a12e0f
+     internal_properties : CAAAAAgAAADPSyd7yPW97vdcNc6MMGYVPXpwoJbCiky2NaJ5ArFlS413toga7nd9lIB6Rs4C/vLaWg==
+     physical_name : .\QRY_DetailsNewsletterQueue.WDR
+     type : 5
+  other_elements : []
+  analysis : .\WW_Newsletter.ana\WW_Newsletter.wda
+  net_assemblies : []
+  uwp_api : []
+  external_components : []
+  internal_components : []
+ common_generation_directory : true
+ wb_skin : 190 Evolution
+ wb_color_palette : GreenVolution
+ languages :
+  - en-GB
+ site_map :
+  roots : []
+  orphans :
+   -
+     name : PAGE_Configuration
+     parameters : []
+     title :
+      fr-FR : Configuration
+      en-GB : Configuration
+     description :
+      fr-FR : Configuration
+      en-GB : Configuration
+   -
+     name : PAGE_Dashboard
+     parameters : []
+     title :
+      fr-FR : Tableau de bord
+      en-GB : Managing the attributes
+     description :
+      fr-FR : Tableau de bord
+      en-GB : Managing the attributes
+   -
+     name : PAGE_Dlg_ImagePicker
+     parameters : []
+     title :
+      fr-FR : Selecteur d'image
+      en-GB : Image picker
+     description :
+      fr-FR : Selecteur d'image
+      en-GB : Image picker
+   -
+     name : PAGE_Identification
+     parameters : []
+     title :
+      fr-FR : Identification
+      en-GB : Unsubscribe
+     description :
+      fr-FR : Identification
+      en-GB : Unsubscribe
+   -
+     name : PAGE_ImportUsers
+     parameters : []
+     title :
+      fr-FR : Importer des utilisateurs
+      en-GB : Importing users
+     description :
+      fr-FR : Importer des utilisateurs
+      en-GB : Importing users
+   -
+     name : PAGE_ManageAttributes
+     parameters : []
+     title :
+      fr-FR : Gestion des attributs
+      en-GB : Dashboard
+     description :
+      fr-FR : Gestion des attributs
+      en-GB : Dashboard
+   -
+     name : PAGE_ManageImages
+     parameters : []
+     title :
+      fr-FR : Gestion des images
+      en-GB : Management of images
+     description :
+      fr-FR : Gestion des images
+      en-GB : Management of images
+   -
+     name : PAGE_ManageList
+     parameters : []
+     title :
+      fr-FR : Gestion des listes d'utilisateurs
+      en-GB : Test page
+     description :
+      fr-FR : Gestion des listes d'utilisateurs
+      en-GB : Test page
+   -
+     name : PAGE_ManageNLTemplates
+     parameters : []
+     title :
+      fr-FR : Gestion des modèles de newsletters
+      en-GB : Managing the sending
+     description :
+      fr-FR : Gestion des modèles de newsletters
+      en-GB : Managing the sending
+   -
+     name : PAGE_ManageNewsletters
+     parameters : []
+     title :
+      fr-FR : Gestion des newsletters
+      en-GB : Managing newsletters
+     description :
+      fr-FR : Gestion des newsletters
+      en-GB : Managing newsletters
+   -
+     name : PAGE_ManageQueue
+     parameters : []
+     title :
+      fr-FR : Gestion des envois
+      en-GB : Managing templates of newsletters
+     description :
+      fr-FR : Gestion des envois
+      en-GB : Managing templates of newsletters
+   -
+     name : PAGE_ManageUsers
+     parameters : []
+     title :
+      fr-FR : Gestion des utilisateurs
+      en-GB : Managing the users
+     description :
+      fr-FR : Gestion des utilisateurs
+      en-GB : Managing the users
+   -
+     name : PAGE_Test
+     parameters : []
+     title :
+      fr-FR : Page de test
+      en-GB : Test addresses
+     description :
+      fr-FR : Page de test
+      en-GB : Test addresses
+   -
+     name : PAGE_TestAddresses
+     parameters : []
+     title :
+      fr-FR : Adresses de test
+      en-GB : Managing lists of users
+     description :
+      fr-FR : Adresses de test
+      en-GB : Managing lists of users
+   -
+     name : PAGE_ViewLog
+     parameters : []
+     title :
+      fr-FR : Consultation des logs
+      en-GB : Managing profile
+     description :
+      fr-FR : Consultation des logs
+      en-GB : Managing profile
+   -
+     name : confirm
+     parameters : []
+     title :
+      fr-FR : Confirmation d'inscription
+      en-GB : Identification
+     description :
+      fr-FR : Confirmation d'inscription
+      en-GB : Identification
+   -
+     name : identification
+     parameters : []
+     title :
+      fr-FR : Identification
+      en-GB : Confirm the registration
+     description :
+      fr-FR : Identification
+      en-GB : Confirm the registration
+   -
+     name : newsletter
+     parameters : []
+     title :
+      fr-FR : Visualisation d'une newsletter
+      en-GB : Viewing a newsletter
+     description :
+      fr-FR : Visualisation d'une newsletter
+      en-GB : Viewing a newsletter
+   -
+     name : profile
+     parameters : []
+     title :
+      fr-FR : Gestion du profil
+      en-GB : Showing logs
+     description :
+      fr-FR : Gestion du profil
+      en-GB : Showing logs
+   -
+     name : registration
+     parameters : []
+     title :
+      fr-FR : Inscription
+      en-GB : Registration
+     description :
+      fr-FR : Inscription
+      en-GB : Registration
+   -
+     name : reinitialization
+     parameters : []
+     title :
+      fr-FR : Réinitialisation de mot de passe
+      en-GB : Reinitializing the password
+     description :
+      fr-FR : Réinitialisation de mot de passe
+      en-GB : Reinitializing the password
+   -
+     name : unregister
+     parameters : []
+     title :
+      fr-FR : Désinscription
+      en-GB : Identification
+     description :
+      fr-FR : Désinscription
+      en-GB : Identification
+   -
+     name : viewimage
+     parameters : []
+     title : {}
+     description : {}
+ url_rewriting :
+  internal_properties : CAAAAAgAAADkPzcUdUUS7wCiun+MCjqYH70RJdzkSv/nRvXZ3ENdikMa6bcHtsAH
+ code_elements :
+  internal_properties : CAAAAAgAAABseimUYz4VdXZ8hGsGFqoxLDfDcHkNZdBf0iQg2FQcqmw5VrO2lryVMt3efm9RagPlXJBReauIsX3ZdB8=
+  type_code : 0
+  p_codes :
+   -
+     code : |1+
+      
+      ConfigureAWPContext(ctxDisk,ctxIDCookieURL)
+      
+      
+     type : 196608
+   -
+     type : 196621
+   -
+     type : 196627
+     enabled : false
+  orphans :
+   -
+     name : Site
+     identifier : 0x41e6cbb600034e90
+     code_elements :
+      type_code : 159
+      p_codes : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+rad :
+ internal_properties : CAAAAAgAAABhIL0UXeZmxDJxY3Xy0Q==
+project_explorer :
+ explorer_type : project
+ children :
+  -
+    explorer_type : pages
+    children :
+     -
+       name : Public pages
+       explorer_type : custom_folder
+       children :
+        -
+          name : confirm
+          explorer_type : element
+          type : 65538
+        -
+          name : unregister
+          explorer_type : element
+          type : 65538
+        -
+          name : identification
+          explorer_type : element
+          type : 65538
+        -
+          name : registration
+          explorer_type : element
+          type : 65538
+        -
+          name : newsletter
+          explorer_type : element
+          type : 65538
+        -
+          name : profile
+          explorer_type : element
+          type : 65538
+        -
+          name : reinitialization
+          explorer_type : element
+          type : 65538
+        -
+          name : viewimage
+          explorer_type : element
+          type : 65538
+  -
+    explorer_type : webdev_control_templates
+    children :
+     -
+       name : Public part templates
+       explorer_type : custom_folder
+       children :
+        -
+          name : TPLC_Confirm
+          explorer_type : element
+          type : 65543
+        -
+          name : TPLC_Unregistration
+          explorer_type : element
+          type : 65543
+        -
+          name : TPLC_Registration
+          explorer_type : element
+          type : 65543
+        -
+          name : TPLC_Profile
+          explorer_type : element
+          type : 65543
+        -
+          name : TPLC_Reinitialization
+          explorer_type : element
+          type : 65543
+resources :
+ string_res :
+  identifier : 0x0
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAAAd98VSJfHHqE3P0QHwrwdhn7ig8dWBR6valpUTgnAMTVXiDg==

@@ -1,0 +1,1341 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : SET_NLMESSAGE
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ac1a19d28a
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      CONSTANT
+      	OPTFOLLOW_OPENING = 1
+      	OPTFOLLOW_LINKS = 2
+      	
+      	BLOCK_TEXT = 1
+      	BLOCK_TEXT_BORDER = 2
+      	BLOCK_SEPARATOR = 3
+      	BLOCK_IMAGE = 4
+      	BLOCK_IMAGE_GROUP = 5
+      	BLOC_IMAGE_CAP = 6
+      	BLOCK_SOCIAL_LINKS = 7
+      	BLOCK_BUTTON = 8
+      	BLOCK_AUTO_FOOTER = 9		// Unsubscribe link + opening image
+      	BLOCK_AUTO_HEADER = 10		// Link for online reading
+      	
+      	PREFIX_ATTR	= "[["
+      	SUFFIX_ATTR	= "]]"
+      	
+      	LINK_DEFAULT_FACEBOOK = "https://www.facebook.com/%1"
+      	LINK_DEFAULT_TWITTER = "https://twitter.com/@%1"
+      	LINK_DEFAULT_GOOGLE_PLUS = "https://plus.google.com/%1/posts"
+      	
+      END
+      
+      garrDefaultSocialLink is array of string = [ LINK_DEFAULT_FACEBOOK, LINK_DEFAULT_TWITTER, LINK_DEFAULT_GOOGLE_PLUS ]
+      
+      STMessageInfo is Structure
+      	NLMessageID is 8-byte int
+      	NameNL is string
+      	Topic is string
+      	OutgoingDateTime is datetime
+      	SenderAddress is string
+      	ReplyToAddress is string
+      	NotificationAddress is string
+      	RecipientFormat is string
+      	NLListID is 8-byte int
+      	IsTemplate is boolean
+      	FollowUpOptions is int
+      	StatusNL is int
+      	
+      	FacebookAccount is string
+      	TwitterAccount is string
+      	GooglePlusAccount is string
+      	
+      	sListName is string
+      END
+      
+      STImageInfo is Structure
+      	nAttachID is 8-byte int
+      	nWidth is int
+      	nHeight is int
+      END
+      
+      STHTMLBlock is Structure
+      	// Type of block (see BLOCK_xxx constant)
+      	nBlockType is int
+      	// Data to build the block
+      	arrText is array of strings
+      	arrImage is array of STImageInfo	
+      	arrLink is array of strings
+      	nLineSize is int
+      	// Result HTML
+      	sGeneratedHTML is string
+      END
+     type : 720896
+  procedures :
+   -
+     name : NL_Message_ListByStatus
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190094986
+     type_code : 15
+     code : |1-
+      // Summary: Lists the newsletters of a given status
+      // Syntax:
+      //[ <Result> = ] NL_Message_ListByStatus (<nStatus> is int)
+      //
+      // Parameters:
+      //	nStatus (integer): Sought status
+      // Return value:
+      // 	array: Array of corresponding messages
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_ListByStatus( LOCAL nStatus is int )
+      
+      arrMsg is array of STMessageInfo
+      arrEmptyMsg is array of STMessageInfo
+      
+      FOR EACH NLMessage WHERE StatusNL = nStatus
+      	IF NLMessage.IsTemplate=False THEN
+      		stMsg is STMessageInfo
+      		FileToMemory(stMsg,NLMessage)
+      		stMsg.sListName = NL_List_Name(stMsg.NLListID)
+      		Add(arrMsg,stMsg)
+      	END
+      END
+      
+      RESULT arrMsg
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrEmptyMsg
+     type : 458752
+   -
+     name : NL_Message_Exist
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190160522
+     type_code : 15
+     code : |1-
+      // Summary: Checks the existence of a NL
+      // Syntax:
+      //[ <Result> = ] NL_Message_Exist (<sNLName> is string)
+      //
+      // Parameters:
+      //	sNLName (UNICODE string): Name of the NL
+      // Return value:
+      // 	boolean: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Exist(LOCAL sNameNL is string)
+      
+      HReadSeekFirst(NLMessage,NameNL,sNameNL)
+      
+      RESULT HFound()
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_Message_Create
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190226058
+     type_code : 15
+     code : |1-
+      // Summary: Creates a new NL message from the specified information
+      // Syntax:
+      //[ <Result> = ] NL_Message_Create (<stNLInfo> is STMessageInfo [, <nTemplateID> is 8-byte int])
+      //
+      // Parameters:
+      //	stNLInfo (STMessageInfo): Description of the message
+      //	nTemplateID (8-byte integer - default value=0): Identifier of the template to copy
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Create(LOCAL stNLInfo is STMessageInfo, LOCAL nTemplateID is 8-byte int = 0)
+      
+      bufBlock is buffer
+      sText is string
+      IF nTemplateID>0 THEN
+      	HReadSeekFirst(NLMessage,NLMessageID,nTemplateID)
+      	bufBlock = NLMessage.MessageHTMLBlock
+      	sText = NLMessage.MessageText
+      END
+      
+      HReset(NLMessage)
+      MemoryToFile(stNLInfo,NLMessage)
+      
+      HAdd(NLMessage,hLockWrite)
+      
+      IF nTemplateID>0 THEN
+      	NLMessage.MessageHTMLBlock = bufBlock
+      	NLMessage.MessageText = sText
+      	HModify(NLMessage)
+      END
+      
+      RESULT NLMessage.NLMessageID
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT 0
+     type : 458752
+   -
+     name : NL_Message_FindInfoByID
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190291594
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_FindInfoByID (<nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLID (8-byte integer): <specify the role of nNLID>
+      // Return value:
+      // 	STMessageInfo: // None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_FindInfoByID( LOCAL nNLID is 8-byte int )
+      
+      stInfoMsg is STMessageInfo
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLID)
+      IF HFound()=False THEN
+      	ErrorThrow(1,"Message not found")
+      END
+      
+      FileToMemory(stInfoMsg,NLMessage)
+      
+      RESULT stInfoMsg
+      
+      CASE Error:
+      ErrorPropagate()
+      RESULT stInfoMsg
+      
+     type : 458752
+   -
+     name : NL_Message_FindInfoByName
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190357130
+     type_code : 15
+     code : |1-
+      // Summary: Finds TO Message
+      // Syntax:
+      //[ <Result> = ] NL_Message_FindInfoByName (<sNameNL> is string)
+      //
+      // Parameters:
+      //	sNameNL (UNICODE string): Name of the sought message
+      // Automatic Process of Errors:   run the block of code CASE ERROR
+      //
+      
+      // Return value:
+      // 	STMessageInfo: // None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      Procedure NL_Message_FindInfoByName( LOCAL sNameNL is string )
+      
+      stInfoMsg is STMessageInfo
+      
+      HReadSeekFirst(NLMessage,NameNL,sNameNL)
+      IF HFound()=False THEN
+      	ErrorThrow(1,"Message not found")
+      END
+      
+      FileToMemory(stInfoMsg,NLMessage)
+      
+      RESULT stInfoMsg
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT stInfoMsg
+     type : 458752
+   -
+     name : NL_Message_Modify
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190422666
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_Message_Modify (<stNLInfo> is STMessageInfo)
+      //
+      // Parameters:
+      //	stNLInfo (STMessageInfo): <specify the role of gstNLInfo>
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Modify(LOCAL stNLInfo is STMessageInfo)
+      
+      HReadSeekFirst(NLMessage,NLMessageID,stNLInfo.NLMessageID,hLockWrite)
+      
+      MemoryToFile(stNLInfo,NLMessage)
+      
+      HModify(NLMessage)
+      
+      CASE Error:
+      ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Message_ChangeRoughText
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190488202
+     type_code : 15
+     code : |1-
+      // Summary: Modifies the rough text of a newsletter
+      // Syntax:
+      //NL_Message_ChangeRoughText (<nMLID> is 8-byte int, <sRoughText> is string)
+      //
+      // Parameters:
+      //	nMLID (8-byte integer): Identifier of the NL
+      //	sRoughText (UNICODE string): New rough text
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_ChangeRoughText( LOCAL nMLID is 8-byte int, LOCAL sPlainText is string )
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nMLID,hLockWrite)
+      
+      NLMessage.MessageText = sPlainText
+      
+      HModify(NLMessage)
+      
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Message_LoadRoughText
+     procedure_id : 1412762130190553738
+     type_code : 15
+     code : |1+
+      // Summary: Returns the rough text of a newsletter
+      // Syntax:
+      //[ <Result> = ] NL_Message_LoadRoughText (<nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLID (8-byte integer): Identifier of the NL
+      // Return value:
+      // 	UNICODE string: Rough text
+      //
+      Procedure NL_Message_LoadRoughText( LOCAL nNLID is 8-byte int ) : string
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLID)
+      
+      RESULT NLMessage.MessageText
+      
+     type : 458752
+   -
+     name : NL_Message_LoadBlockList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190619274
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_LoadBlockList (<nMLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nMLID (8-byte integer): <specify the role of nMLID>
+      // Return value:
+      // 	table: // None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_LoadBlockList( LOCAL nMLID is 8-byte int ) : array of STHTMLBlock
+      
+      arrBlock is array of STHTMLBlock
+      bufBlock is buffer
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nMLID)
+      IF HFound(NLMessage)=False THEN
+      	ErrorThrow(1,"Message not found")
+      END
+      
+      IF NLMessage.MessageHTMLBlock="" THEN
+      	RESULT arrBlock
+      END
+      
+      bufBlock = NLMessage.MessageHTMLBlock
+      Deserialize(arrBlock,bufBlock,psdBinary)
+      
+      // Generates the blocks if necessary
+      FOR EACH stBlock of arrBlock
+      	IF stBlock.sGeneratedHTML="" THEN
+      		NL_Message_GenerateBlock(stBlock)
+      	END
+      END
+      
+      RESULT arrBlock
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrBlock
+      	
+     type : 458752
+   -
+     name : NL_Message_GenerateBlock
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190684810
+     type_code : 15
+     code : |1-
+      // Summary: Generates the HTML code of a message block
+      // Syntax:
+      //NL_Message_GenerateBlock (<stBlock> is STHTMLBlock)
+      //
+      // Parameters:
+      //	stBlock (STHTMLBlock): Block to generate
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_GenerateBlock( stBlock is STHTMLBlock )
+      
+      SWITCH stBlock.nBlockType
+      	CASE BLOCK_TEXT
+      		stBlock.sGeneratedHTML = "<div class=""__nl__text"">"+stBlock.arrText[1]+"</div>"
+      	CASE BLOCK_TEXT_BORDER
+      		stBlock.sGeneratedHTML = "<div class=""__nl__textborder"">"+stBlock.arrText[1]+"</div>"
+      	CASE BLOCK_SEPARATOR
+      		stBlock.sGeneratedHTML = "<hr class=""__nl__hr"" />"
+      	CASE BLOCK_IMAGE
+      		stBlock.sGeneratedHTML = "<div class=""__nl__image""><img src="""+NL_GenerateAttachURL(stBlock.arrImage[1].nAttachID,stBlock.arrImage[1].nWidth,stBlock.arrImage[1].nHeight,"")+""" /></div>"
+      	CASE BLOCK_IMAGE_GROUP
+      		stBlock.sGeneratedHTML = "<div class=""__nl__groupimage""><table class=""__nl__tablegroupimage"">"
+      		nMaxLine is int = stBlock.arrImage..Occurrence/stBlock.nLineSize
+      		IF (stBlock.arrImage..Occurrence modulo stBlock.nLineSize)<>0 THEN nMaxLine++
+      		FOR nrow=0 _TO_ nMaxLine-1
+      			stBlock.sGeneratedHTML += "<tr>"
+      			FOR nImg=1 _TO_ stBlock.nLineSize
+      				nSubscript is int = (nrow*stBlock.nLineSize)+nImg
+      				IF nSubscript>stBlock.arrImage..Occurrence THEN BREAK
+      				stBlock.sGeneratedHTML += "<td class=""__nl__cellgroupimage""><img src="""+NL_GenerateAttachURL(stBlock.arrImage[nSubscript].nAttachID,stBlock.arrImage[nSubscript].nWidth,stBlock.arrImage[nSubscript].nHeight,"")+""" width="""+stBlock.arrImage[nSubscript].nWidth+""" height="""+stBlock.arrImage[nSubscript].nHeight+""" class=""__nl__imagegroup""/><br />"+stBlock.arrText[nSubscript]+"</td>"
+      			END			
+      			stBlock.sGeneratedHTML += "</tr>"			
+      		END
+      		stBlock.sGeneratedHTML += "</table></div>"
+      	CASE BLOC_IMAGE_CAP
+      		stBlock.sGeneratedHTML = "<div><table class=""__nl__tableimagecap""><tr>"
+      		stBlock.sGeneratedHTML += "<td class=""__nl__cellimagelib""><img src="""+NL_GenerateAttachURL(stBlock.arrImage[1].nAttachID,stBlock.arrImage[1].nWidth,stBlock.arrImage[1].nHeight,"")+""" width="""+stBlock.arrImage[1].nWidth+""" height="""+stBlock.arrImage[1].nHeight+""" class=""__nl__imagecap""/></td>"
+      		stBlock.sGeneratedHTML += "<td class=""__nl__cellimagecap"">"+stBlock.arrText[1]+"</td>"
+      		stBlock.sGeneratedHTML += "</tr></table></div>"
+      	CASE BLOCK_SOCIAL_LINKS
+      		stBlock.sGeneratedHTML = "<div class=""__nl__social"">"
+      		FOR nSoc=1 _TO_ stBlock.arrLink..Occurrence
+      			IF stBlock.arrLink[nSoc]<>"" THEN
+      				sURL is string = StringBuild(garrDefaultSocialLink[nSoc],stBlock.arrLink[nSoc])
+      				stBlock.sGeneratedHTML += "<a href="""+sURL+""">"
+      				stBlock.sGeneratedHTML += "<img src="""+NL_GenerateAttachURL(stBlock.arrImage[nSoc].nAttachID,stBlock.arrImage[nSoc].nWidth,stBlock.arrImage[nSoc].nHeight,"")+""" title="""+stBlock.arrText[nSoc]+""" alt="""+stBlock.arrText[nSoc]+""" width=""48"" height=""48"">"
+      				stBlock.sGeneratedHTML += "</a>"
+      			END
+      		END
+      		stBlock.sGeneratedHTML += "</div>"
+      	CASE BLOCK_BUTTON
+      		stBlock.sGeneratedHTML = "<div class=""__nl__blocbtn"">"+stBlock.arrText[1]+"<div class=""__nl__groupbtn"">"
+      		FOR nBtn=1 _TO_ stBlock.arrLink..Occurrence
+      			stBlock.sGeneratedHTML += "<a href="""+stBlock.arrLink[nBtn]+""">"
+      			stBlock.sGeneratedHTML += "<input type=""button"" value="""+stBlock.arrText[nBtn+1]+""" class=""__nl__btn"" onClick="" ""/>"
+      			stBlock.sGeneratedHTML += "</a>"
+      		END
+      		stBlock.sGeneratedHTML += "</div></div>"
+      	CASE BLOCK_AUTO_FOOTER
+      		stBlock.sGeneratedHTML = "<div class=""__nl__footerauto""><hr class=""__nl__hr"" />"+stBlock.arrText[1]+"</div>"
+      	CASE BLOCK_AUTO_HEADER
+      		stBlock.sGeneratedHTML = "<div class=""__nl__headerauto"">"+stBlock.arrText[1]+"</div>"
+      END
+      
+      stBlock.sGeneratedHTML = Replace(stBlock.sGeneratedHTML,CR,"<br />")
+      
+      sALine is string
+      sATempLine is string
+      sReturn is string
+      FOR EACH string sALine of stBlock.sGeneratedHTML SEPAREE by CR
+      	IF Length(sALine) > 500 THEN
+      		sATempLine = sALine
+      		sReturn += [CR] + Replace(sALine, "<", CR + "<")
+      	ELSE
+      		sReturn += [CR] + sALine
+      	END
+      END
+      
+      stBlock.sGeneratedHTML = sReturn
+      
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Message_ChangeBlockList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190750346
+     type_code : 15
+     code : |1-
+      // Summary: Updates the list of HTML blocks in a message
+      // Syntax:
+      //NL_Message_ChangeBlockList (<nMessageID> is 8-byte int, <arrBlock> is array)
+      //
+      // Parameters:
+      //	nMessageID (8-byte integer): Identifier of the message
+      //	arrBlocks (array): Array of blocks
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_ChangeBlockList( LOCAL nMessageID is 8-byte int, LOCAL arrBlock is array of STHTMLBlock)
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nMessageID,hLockWrite)
+      IF HFound(NLMessage)=False THEN
+      	ErrorThrow(1,"Message not found")
+      	RETURN
+      END
+      
+      bufBlock is buffer
+      Serialize(arrBlock,bufBlock,psdBinary)
+      NLMessage.MessageHTMLBlock = bufBlock
+      
+      HModify(NLMessage)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_Message_Program
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130190815882
+     type_code : 15
+     code : |1+
+      // Summary: Programs a message
+      // Syntax:
+      //[ <Result> = ] NL_Message_Program (<nNLMessageID> is 8-byte int, <dtSendingDateTime> is datetime)
+      //
+      // Parameters:
+      //	nNLMessageID (8-byte integer): Identifier of NLMessage
+      //	dtSendingStartDate (datetime): Sending date and time
+      // Return value:
+      // 	boolean: True if the programming was successful, False otherwise
+      
+      // Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Program(LOCAL nNLMessageID is 8-byte int, LOCAL dtOutgoingDateTime is datetime)
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLMessageID)
+      
+      NLMessage.StatusNL = RPT_PROGRAM
+      NLMessage.OutgoingDateTime = dtOutgoingDateTime
+      
+      HModify(NLMessage)
+      
+      RESULT True
+      
+      CASE Error:	
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_GenerateQueueElements
+     internal_properties : CAAAAAgAAABgu+0KjoGHN9guUrUBFGl2yJsHpXsTAD+uNLzCgFxhYOtxmqgxbcUcXzgeEOmjIPNbKoQIgvdimHSfuypt7/wxgPhJgz6KpRqcqoRKLrrTtAJVQcSTw7TR7QULou9wGAFz4k3GlwiOuOlKIhI/d0LnZH4pHzRiQHgeUQ6zgCdO4GrSaQ4=
+     procedure_id : 1412762130190881418
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_GenerateQueueElements (<nNLMessageID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLMessageID (8-byte integer): <specify the role of nNLMessageID>
+      // Return value:
+      // 	None
+      //
+      // Example:
+      // Indicate an example.
+      //
+      Procedure NL_GenerateQueueElements(LOCAL nNLMessageID is 8-byte int)
+      
+      clEmail is a Email
+      arrUsers is array of STUserInfo
+      
+      // Finds the newsletter
+      HReadSeekFirst(NLMessage,NLMessageID,nNLMessageID)
+      IF HFound(NLMessage) = False THEN
+      	NL_Log_Add(StringBuild("Failure reading the %1 NL,",nNLMessageID),LOG_ERROR)
+      	RETURN
+      END
+      
+      
+      // Retrieve the users
+      arrUsers = NL_List_ReadUser(NLMessage.NLListID)
+      stAUser is STUserInfo
+      
+      // Notification for start of mailing
+      NL_Message_Notification(nNLMessageID,"Start of newsletter sending")
+      nPercentageLevel is int = (arrUsers..Occurrence/10)+1
+      
+      FOR i = 1 _TO_ arrUsers..Occurrence
+      	
+      	// Generates the email
+      	stAUser = NL_User_ReadInfo(arrUsers[i].NLUserID)
+      	
+      	// we are positioned on NLMessage
+      	clEmail = NL_Message_GenerateAnEmail(stAUser)
+      	
+      	// Add the message to send
+      	SET_NLEMAIL.NL_Email_AddMessageToSend(clEmail,NLMessage.NLListID,NLMessage.NLMessageID,stAUser.NLUserID)
+      	IF ErrorOccurred THEN
+      		NL_Log_Add(StringBuild("Failure building an email for the user %1",stAUser.NLUserID),LOG_ERROR)
+      	END
+      	
+      	// Notification every 10%
+      	IF (i modulo nPercentageLevel)=0 THEN
+      		NL_Message_Notification(nNLMessageID,StringBuild("Newsletter currently sent: %1 %%",(10*i)/nPercentageLevel))
+      	END
+      END
+      
+      NL_Message_Notification(nNLMessageID,"End of newsletter sending")
+     type : 458752
+   -
+     name : NL_Message_GenerateAnEmail
+     procedure_id : 1412762130190946954
+     type_code : 15
+     code : |1-
+      // Summary: this procedure is used to generate an email (NOTE: This procedure considers that we are positioned on the proper record of NLMessage)
+      // Syntax:
+      //[ <Result> = ] NL_Message_GenerateAnEmail (<stAUser> is STUserInfo)
+      //
+      // Parameters:
+      //	stAUser (STUserInfo): The user information
+      // Return value:
+      // 	Email: // 	None
+      //
+      
+      Procedure NL_Message_GenerateAnEmail(stAUser is STUserInfo)
+      
+      
+      clEmail is a Email
+      
+      clEmail..Subject = NL_Message_MergeAttributes(NLMessage.Topic,stAUser,NLMessage.NLMessageID,NLMessage.NLListID)
+      clEmail..Message = NL_Message_MergeAttributes(NLMessage.MessageText,stAUser,NLMessage.NLMessageID,NLMessage.NLListID)
+      clEmail..SenderAddress = NLMessage.SenderAddress
+      // Checks whether the recipient format contains at least the EMAIL tag ; otherwise, replace it by the simple email
+      IF Position(NLMessage.RecipientFormat,PREFIX_ATTR+ATTR_EMAIL+SUFFIX_ATTR)>0 THEN
+      	Add(clEmail..Recipient,NL_Message_MergeAttributes(NLMessage.RecipientFormat,stAUser,NLMessage.NLMessageID,NLMessage.NLListID))
+      ELSE
+      	Add(clEmail..Recipient,stAUser.Email)
+      END
+      clEmail..Sender = NLMessage.SenderAddress
+      
+      // Build the HTML by merging the attributes for each message block
+      sHTMLSource is string
+      arrBlock is array of STHTMLBlock = NL_Message_LoadBlockList(NLMessage.NLMessageID)
+      IF arrBlock..Occurrence>0 THEN
+      	sHTMLSource = NL_Message_HTMLStart(clEmail..Subject)
+      	FOR EACH stBlock of arrBlock
+      		sHTMLSource += NL_Message_MergeAttributes(stBlock.sGeneratedHTML,stAUser,NLMessage.NLMessageID,NLMessage.NLListID)
+      	END
+      	sHTMLSource += NL_Message_HTMLEnd()
+      END
+      clEmail..HTML = StringToUTF8(sHTMLSource)
+      	
+      // Find the attachments
+      clAttach is a EmailAttach
+      
+      // Finds the possible attachments
+      FOR EACH NLMessage_NLAttach WHERE NLMessageID = NLMessage.NLMessageID
+      	
+      	HReadSeekFirst(NLAttach,NLAttachID,NLMessage_NLAttach.NLAttachID)
+      	dbgAssert(HFound(NLAttach))
+      	
+      	// Build the attachment	
+      	clAttach..ContentDescription = NLAttach.Description
+      	clAttach..Content = NLAttach.Content
+      	clAttach..Name = NLAttach.Name
+      	clAttach..ContentType = NLAttach.Type
+      	
+      	// use the Hash to identify the attachment to avoid mixing the attachments on the mobile devices.
+      	// On the mobile devices, the attachment it is not downloaded again if its identifier does not change.
+      	clAttach..Identifier = NLAttach.Hash
+      	
+      	Add(clEmail.Attach,clAttach)	
+      END
+      
+      RESULT clEmail
+     type : 458752
+   -
+     name : NL_Message_MergeAttributes
+     procedure_id : 1412762130191012490
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_MergeAttributes (<sTextMerge> is string, <stAUser> is STUserInfo, <nNLMessageID> is 8-byte int, <nNLListID> is 8-byte int)
+      //
+      // Parameters:
+      //	sTextMerge (UNICODE string): <specify the role of sText>
+      //	stAUser (STUserInfo): <specify the role of stAUser>
+      //	nNLMessageID (8-byte integer): <specify the role of stMessageInfo>
+      //	nNLListID (8-byte integer): <specify the role of nNLListID>
+      // Return value:
+      // 	Undefined type: // 	None
+      //
+      // Example:
+      // Indicate an example.
+      //
+      Procedure NL_Message_MergeAttributes(LOCAL sTextMerge is string,LOCAL stAUser is STUserInfo,LOCAL nNLMessageID is 8-byte int, LOCAL nNLListID is 8-byte int)
+      
+      sSourceTextMerge is string = sTextMerge
+      
+      // Replace the global parameters
+      aaParam is ASSOCIATIVE ARRAY of strings = NL_ListMessageParam()
+      FOR EACH sVal,sKey of aaParam
+      	sTextMerge = Replace(sTextMerge,PREFIX_ATTR+sKey+SUFFIX_ATTR,sVal)
+      END
+      
+      // Replace the list attributes
+      aaListAttr is ASSOCIATIVE ARRAY of strings = NL_List_AttributeList(nNLListID)
+      FOR EACH sVal,sKey of aaListAttr
+      	sTextMerge = Replace(sTextMerge,PREFIX_ATTR+sKey+SUFFIX_ATTR,sVal)
+      END
+      
+      // Replace the newsletter attributes
+      aaNLAttr is ASSOCIATIVE ARRAY of strings = NL_Message_ListAttributes(nNLMessageID)
+      FOR EACH sVal,sKey of aaNLAttr
+      	sTextMerge = Replace(sTextMerge,PREFIX_ATTR+sKey+SUFFIX_ATTR,sVal)
+      END
+      
+      // Replace the user attributes
+      aaAttr is ASSOCIATIVE ARRAY of strings = NL_User_AttributeList(stAUser.Email,nNLListID)
+      FOR EACH sVal,sKey of aaAttr
+      	sTextMerge = Replace(sTextMerge,PREFIX_ATTR+sKey+SUFFIX_ATTR,sVal)
+      END
+      
+      IF sTextMerge = sSourceTextMerge THEN
+      	// No modification
+      	// Return the string
+      	RESULT sTextMerge
+      ELSE
+      	// Recall (to have the ability to create built attributes (type: LASTNAMEFIRSTNAME = TITLE LASTNAME FIRSTNAME)
+      	RESULT NL_Message_MergeAttributes(sTextMerge,stAUser,nNLMessageID,nNLListID)
+      END
+     type : 458752
+   -
+     name : NL_Message_ListTemplates
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191078026
+     type_code : 15
+     code : |1-
+      // Summary: Lists the newsletter templates
+      // Syntax:
+      //[ <Result> = ] NL_Message_TemplateList ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	array: Array of corresponding messages
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_ListTemplates( )
+      
+      arrMdl is array of STMessageInfo
+      arrEmptyMdl is array of STMessageInfo
+      
+      FOR EACH NLMessage WHERE IsTemplate = True
+      	stMsg is STMessageInfo
+      	FileToMemory(stMsg,NLMessage)
+      	HReadSeekFirst(NLList,NLListID,stMsg.NLListID)
+      	stMsg.sListName = NLList.Name
+      	Add(arrMdl,stMsg)
+      END
+      
+      RESULT arrMdl
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrEmptyMdl
+     type : 458752
+   -
+     name : NL_Message_Delete
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191143562
+     type_code : 15
+     code : |1-
+      // Summary: Deletes a newsletter
+      // Syntax:
+      //NL_Message_Delete (<nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLID (8-byte integer): Identifier
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Delete( LOCAL nNLID is 8-byte int )
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLID,hLockReadWrite)
+      HDelete(NLMessage)
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_Message_InitBlock
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191209098
+     type_code : 15
+     code : |1+
+      // Summary: Initializes a block with the default values
+      // Syntax:
+      //NL_Message_InitBlock (<stBlock> is STHTMLBlock)
+      //
+      // Parameters:
+      //	stBlock (STHTMLBlock): <specify the role of stBlock>
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_InitBlock(stBlock is STHTMLBlock )
+      
+      stDefaultImg is STImageInfo
+      stDefaultImg.nAttachID = 0
+      stDefaultImg.nWidth = 100
+      stDefaultImg.nHeight = 50
+      
+      SWITCH stBlock.nBlockType
+      	CASE BLOCK_TEXT
+      		Add(stBlock.arrText,"Enter your text here")
+      	CASE BLOCK_TEXT_BORDER
+      		Add(stBlock.arrText,"Enter your text here")
+      	CASE BLOCK_SEPARATOR
+      	CASE BLOCK_IMAGE
+      		Add(stBlock.arrImage,stDefaultImg)
+      	CASE BLOCK_IMAGE_GROUP
+      		stBlock.nLineSize = 3
+      		Add(stBlock.arrImage,stDefaultImg)
+      		Add(stBlock.arrText,"Enter your text here")
+      	CASE BLOC_IMAGE_CAP
+      		Add(stBlock.arrImage,stDefaultImg)
+      		Add(stBlock.arrText,"Enter your text here")
+      	CASE BLOCK_SOCIAL_LINKS
+      		Add(stBlock.arrText,"Follow us on Facebook")
+      		Add(stBlock.arrText,"Follow us on Twitter")
+      		Add(stBlock.arrText,"Follow us on Google Plus")
+      		Add(stBlock.arrLink,StringBuild(LINK_DEFAULT_FACEBOOK,PREFIX_ATTR,SUFFIX_ATTR))
+      		Add(stBlock.arrLink,StringBuild(LINK_DEFAULT_TWITTER,PREFIX_ATTR,SUFFIX_ATTR))
+      		Add(stBlock.arrLink,StringBuild(LINK_DEFAULT_GOOGLE_PLUS,PREFIX_ATTR,SUFFIX_ATTR))
+      		stLogoImg is STImageInfo
+      		stLogoImg.nWidth = 80
+      		stLogoImg.nHeight = 80
+      		stLogoImg.nAttachID = NL_Attach_FindIDByName(ATTACH_NAME_FACEBOOK_ID)
+      		Add(stBlock.arrImage,stLogoImg)
+      		stLogoImg.nAttachID = NL_Attach_FindIDByName(ATTACH_NAME_TWITTER_ID)
+      		Add(stBlock.arrImage,stLogoImg)
+      		stLogoImg.nAttachID = NL_Attach_FindIDByName(ATTACHE_NAME_GOOGLE_PLUS_ID)
+      		Add(stBlock.arrImage,stLogoImg)
+      	CASE BLOCK_BUTTON
+      		Add(stBlock.arrText,"Choice 1")
+      		Add(stBlock.arrText,"Choice 2")
+      		Add(stBlock.arrLink,StringBuild("%1URL_PUBLIC%2",PREFIX_ATTR,SUFFIX_ATTR))
+      		Add(stBlock.arrLink,StringBuild("%1URL_PUBLIC%2",PREFIX_ATTR,SUFFIX_ATTR))
+      	CASE BLOCK_AUTO_FOOTER
+      		Add(stBlock.arrText,StringBuild("To unsubscribe from the %1SITE_NAME%2 newsletters, click <a href=""%1URL_UNSUBSCRIBE_PAGE%2"">this link</a>.",PREFIX_ATTR,SUFFIX_ATTR))
+      	CASE BLOCK_AUTO_HEADER
+      		Add(stBlock.arrText,StringBuild("Newsletter of %1SITE_NAME%2 site" ,PREFIX_ATTR,SUFFIX_ATTR))
+      		Add(stBlock.arrLink,StringBuild("%1URL_DISPLAYNL%2",PREFIX_ATTR,SUFFIX_ATTR))
+      END
+      
+      CASE Error:
+      	ErrorPropagate()
+      
+     type : 458752
+   -
+     name : NL_Message_NbMessageStatus
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191274634
+     type_code : 15
+     code : |1-
+      // Summary: Counts the number of messages in a given status
+      // Syntax:
+      //[ <Result> = ] NL_Message_NbMessageStatus (<nStatus> is int)
+      //
+      // Parameters:
+      //	nStatus (integer): Sought status
+      // Return value:
+      // 	Undefined type: Number of emails
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_NbMessageStatus( LOCAL nStatus is int )
+      
+      HExecuteQuery(QRY_CountMessageInStatus,hQueryDefault,nStatus)
+      
+      RESULT QRY_CountMessageInStatus.Count
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT 0
+     type : 458752
+   -
+     name : NL_Message_Notification
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191340170
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_Message_Notification (<nNLMessageID> is 8-byte int, <sNotifMessage> is string)
+      //
+      // Parameters:
+      //	nNLMessageID (8-byte integer): <specify the role of nNLMessageID>
+      //	sNotifMessage (UNICODE string): <specify the role of sNotifMessage>
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_Notification(LOCAL nNLMessageID is 8-byte int, LOCAL sNotifMessage is string)
+      
+      stInfo is STMessageInfo = NL_Message_FindInfoByID(nNLMessageID)
+      IF stInfo.NotificationAddress="" THEN RETURN
+      
+      cEmail is a Email
+      cEmail..Sender = NL_ReadParam(PARAM_SENDER_EMAIL)
+      cEmail..Recipient[1] = stInfo.NotificationAddress
+      cEmail..Subject = StringBuild("[NOTIF] %1: "+sNotifMessage,NL_ReadParam(PARAM_SITE_NAME,False,"WW_Newsletter"))
+      cEmail..Message = StringBuild([
+      	Hello,
+      	
+      	I'm the robot for managing the newsletters of %1
+      	This is a notification message of the %3 newsletter.
+      	
+      	%2
+      	
+      	Best regards.
+      ],NL_ReadParam(PARAM_SITE_NAME),sNotifMessage,stInfo.NameNL)
+      
+      NL_Email_AddMessageToSend(cEmail,EMAIL_WITHOUT_LIST,EMAIL_WITHOUT_MESSAGE,EMAIL_WITHOUT_USER,EMAIL_MEDIUM_PRIORITY)
+      
+      CASE Error:
+      ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Message_CSSSheet
+     procedure_id : 1412762130191405706
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_CSSSheet ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	UNICODE string: // 	None
+      //
+      Procedure NL_Message_CSSSheet()
+      
+      RESULT  [
+      <style type=text/css>
+      
+      /* Common styles */
+      html {
+      font-family: sans-serif;
+      }
+      
+      body {
+      margin: 0;
+      font-size: 1em;
+      line-height: 1.4;
+      color: #222;
+      }
+      
+      a {
+      background: transparent;
+      }
+      
+      a:focus {
+      outline: thin dotted;
+      }
+      
+      a:active,
+      a:hover {
+      outline: 0;
+      }
+      
+      hr {
+      }
+      
+      table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      } .__nl__main {
+      width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #eee;
+      padding: 10px;
+      } .__nl__headerauto {
+      font-size: 7pt;
+      text-align: center;
+      padding: 5px;
+      } .__nl__text {
+      color: #555;
+      padding: 10px;
+      } .__nl__textborder {
+      width: 560px;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      margin-left: auto;
+      margin-right: auto;
+      color: #555;
+      padding: 10px;
+      } .__nl__hr {
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 20px;
+      display: block;
+      height: 1px;
+      border: 0;
+      border-top: 1px solid #ccc;
+      padding: 0;
+      } .__nl__image {
+      margin-left:auto;
+      margin-right:auto;
+      padding: 10px;
+      } .__nl__image img {
+      margin-left: auto;
+      margin-right: auto;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      display:block;
+      } .__nl__groupimage {
+      padding: 10px;
+      } .__nl__tablegroupimage {
+      margin-left:auto;
+      margin-right:auto;
+      text-align: center;
+      } .__nl__imagegroup {
+      margin: 20px;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      } .__nl__cellgroupimage {
+      font-size: 9pt;
+      } .__nl__imagelib {
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      } .__nl__cellimagelib {
+      padding: 20px;
+      font-size: 11pt;
+      } .__nl__social {
+      text-align: right;
+      vertical-align: bottom;
+      margin: 20px;
+      } .__nl__blocbtn {
+      margin: 20px;
+      } .__nl__groupbtn {
+      padding: 20px;
+      margin-left: 5%;
+      margin-right: 5%;
+      } .__nl__btn {
+      margin-left: 5%;
+      margin-right: 5%;
+      width: 35%;
+      } .__nl__footerauto {
+      font-size: 7pt;
+      text-align: center;
+      padding: 5px;
+      }
+      </style>
+      ]
+     type : 458752
+   -
+     name : NL_Message_HTMLStart
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191471242
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_HTMLStart (<sTopic> is string)
+      //
+      // Parameters:
+      //	sTopic (UNICODE string): <specify the role of sTopic>
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_HTMLStart( LOCAL sSubject is string )
+      
+      RESULT StringBuild([
+      <!DOCTYPE html>
+      <html>
+      <head>
+      <meta charset="utf-8">
+      %2
+      <title>%1</title>
+      </head>
+      <body>
+      <div class="__nl__main">
+      ],sSubject,NL_Message_CSSSheet())
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_Message_HTMLEnd
+     procedure_id : 1412762130191536778
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_HTMLEnd ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	UNICODE string: // 	None
+      //
+      Procedure NL_Message_HTMLEnd()
+      
+      RESULT [
+      </div>
+      </body>
+      </html>
+      ]
+     type : 458752
+   -
+     name : NL_Message_ListAttributes
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191602314
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_ListAttributes (<nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLID (8-byte integer): <specify the role of nNLID>
+      // Return value:
+      // 	associative array: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_ListAttributes( LOCAL nNLID is 8-byte int<useful> )
+      
+      aaAttr is ASSOCIATIVE ARRAY of strings
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLID)
+      IF HFound(NLMessage)=False THEN
+      	ErrorThrow(1,"Message not found")
+      	RESULT aaAttr
+      END
+      
+      aaAttr["FACEBOOK_ID"] = NLMessage.FacebookAccount
+      aaAttr["TWITTER_ID"] = NLMessage.TwitterAccount
+      aaAttr["GOOGLE_PLUS_ID"] = NLMessage.GooglePlusAccount
+      
+      RESULT aaAttr
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT aaAttr
+     type : 458752
+   -
+     name : NL_Message_InitDefaultBlock
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191667850
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_InitDefaultBlock ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	table: // None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_InitDefaultBlock() : array of STHTMLBlock
+      
+      arrBlock is array of STHTMLBlock
+      
+      // Header
+      stHeaderBlock is STHTMLBlock
+      stHeaderBlock.nBlockType = BLOCK_AUTO_HEADER
+      NL_Message_InitBlock(stHeaderBlock)
+      NL_Message_GenerateBlock(stHeaderBlock)
+      Add(arrBlock,stHeaderBlock)
+      
+      // Text
+      stTextBlock is STHTMLBlock
+      stTextBlock.nBlockType = BLOCK_TEXT
+      NL_Message_InitBlock(stTextBlock)
+      NL_Message_GenerateBlock(stTextBlock)
+      Add(arrBlock,stTextBlock)
+      
+      // Footer
+      stFooterBlock is STHTMLBlock
+      stFooterBlock.nBlockType = BLOCK_AUTO_FOOTER
+      NL_Message_InitBlock(stFooterBlock)
+      NL_Message_GenerateBlock(stFooterBlock)
+      Add(arrBlock,stFooterBlock)
+      
+      RESULT arrBlock
+      
+      CASE Error:
+      	ErrorPropagate()
+      	DeleteAll(arrBlock)
+      	RESULT arrBlock
+     type : 458752
+   -
+     name : NL_Message_NextSending
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191733386
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_NextSending ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	datetime: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Message_NextSending() : datetime
+      
+      HExecuteQuery(QRY_NextScheduling)
+      
+      RESULT QRY_NextScheduling.OutgoingDateTime
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_Message_CancelProgram
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130191798922
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Message_CancelProgram (<nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLMessageID (8-byte integer): <specify the role of nNLMessageID>
+      // Return value:
+      // 	boolean: // 	None
+      //
+      //	dtSendingDateTime (datetime): <sepcify the role of dtSendingDateTime>// Automatic process of errors:   run the CASE ERROR block
+      //
+      
+      Procedure NL_Message_CancelProgram(LOCAL nNLMessageID is 8-byte int)
+      
+      HReadSeekFirst(NLMessage,NLMessageID,nNLMessageID)
+      
+      NLMessage.StatusNL = RPT_DRAFT
+      NLMessage.OutgoingDateTime = ""
+      HModify(NLMessage)
+      
+      RESULT True
+      
+      CASE Error:	
+      ErrorPropagate()
+      RESULT False
+     type : 458752
+   -
+     name : NL_Message_SendInTest
+     procedure_id : 1412762130191864458
+     type_code : 15
+     code : |1+
+      // Summary: Sends a newsletter to the test email addresses
+      // Syntax:
+      //NL_Message_SendInTest (<nNLMessageID> is 8-byte int)
+      //
+      // Parameters:
+      //	nNLMessageID (8-byte integer): Identifier of the NL
+      // Return value:
+      // 	None
+      //
+      Procedure NL_Message_SendInTest(LOCAL nNLMessageID is 8-byte int)
+      
+      clEmail is a Email
+      arrUsers is array of STUserInfo = NL_User_SearchByAttribute(ATTR_TESTADDR,True)
+      
+      // Finds the newsletter
+      HReadSeekFirst(NLMessage,NLMessageID,nNLMessageID)
+      IF HFound(NLMessage) = False THEN
+      	NL_Log_Add(StringBuild("Failure reading the %1 NL,",nNLMessageID),LOG_ERROR)
+      	RETURN
+      END
+      
+      
+      // Retrieve the users
+      stAUser is STUserInfo
+      
+      FOR i = 1 _TO_ arrUsers..Occurrence
+      
+      	// Generates the email
+      	stAUser = NL_User_ReadInfo(arrUsers[i].NLUserID)
+      	
+      	// we are positioned on NLMessage
+      	clEmail = NL_Message_GenerateAnEmail(stAUser)
+      	
+      	// Add the message to send
+      	SET_NLEMAIL.NL_Email_AddMessageToSend(clEmail,NLMessage.NLListID,NLMessage.NLMessageID,stAUser.NLUserID)
+      	IF ErrorOccurred THEN
+      		NL_Log_Add(StringBuild("Failure building an email for the user %1",stAUser.NLUserID),LOG_ERROR)
+      	END
+      END
+      
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241b986290
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

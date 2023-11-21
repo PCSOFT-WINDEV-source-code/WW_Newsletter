@@ -1,0 +1,101 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : viewimage
+ major_version : 28
+ minor_version : 0
+ type : 65538
+ description : ""
+ subtype : 8192
+page :
+ name : viewimage
+ identifier : 0x239b24382f91f5d3
+ internal_properties : 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
+ properties : {}
+ type : 1
+ languages :
+  - en-GB
+ code_elements :
+  type_code : 38
+  p_codes :
+   -
+     internal_properties : CAAAAAgAAAD3PfhAj13+e3Tq365W/blzvSGdoN6J5K4US3kiB8bjYfoY0ANQmI+kHwpltaxV/4XJzvToP9zvc0FAUaUEhW3Nud9GGA0xCOiIYt4jowi+e0qmBhgGkQ==
+     code : |1-
+      // Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      // If a token is received, note the opening
+      sOpeningToken is string = PageParameter(PAGEPARAM_OPENINGTOKEN)
+      IF sOpeningToken<>"" THEN
+      	NL_Attach_OpeningNote(sOpeningToken)
+      END
+      
+      // Returns the attachment
+      nAttachID is 8-byte int = PageParameter(PAGEPARAM_ATTACHID)
+      nWidth is int = PageParameter(PAGEPARAM_WIDTH)
+      nHeight is int = PageParameter(PAGEPARAM_HEIGHT)
+      stAttache is STAttachInfo = NL_Attach_Build(nAttachID,nWidth,nHeight)
+      
+      MyPage..Title = stAttache.Description
+      StringDisplay(stAttache.Content,stAttache.Type,stAttache.Name)
+      
+      CASE Error:
+      	// TODO: display an error page
+      	StringDisplay("Error")
+     type : 851996
+   -
+     type : 852017
+     enabled : false
+   -
+     type : 852119
+     enabled : false
+   -
+     type : 852298
+     role : N
+   -
+     type : 851999
+     role : N
+   -
+     type : 852000
+     role : N
+   -
+     type : 852232
+     enabled : false
+   -
+     type : 852167
+     enabled : false
+   -
+     type : 852169
+     role : N
+     enabled : false
+   -
+     type : 852225
+     role : N
+     enabled : false
+   -
+     type : 852227
+     enabled : false
+   -
+     type : 1310979
+     enabled : false
+   -
+     type : 852228
+     role : N
+     enabled : false
+   -
+     type : 852217
+     role : N
+     enabled : false
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : PAGE_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241bc562a0
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+webification :
+ internal_properties : CAAAAAgAAACYzxT95H3qP7nIys4LqA==
+custom_note :
+ internal_properties : CAAAAAgAAAC68/W0/adbG0nFCRhrE42B5HRnbDzVHaz86sSQyxlBk7I=
+rad :
+ internal_properties : CAAAAAgAAABoAN7PLpwJW3EiA7WVZdCA5EwrCA1rvutcDHooMWKe

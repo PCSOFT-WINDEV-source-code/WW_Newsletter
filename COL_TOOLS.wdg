@@ -1,0 +1,200 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_TOOLS
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ad1acdd5a6
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      CONSTANT
+      	SIZE_CONFIRMATION_KEY = 10
+      	SIZE_PASSWORD = 12
+      	PARAM_DOUBLE_OPT_IN = "DOUBLE_OPT_IN"
+      	PARAM_SITE_NAME = "SITE_NAME"
+      	PARAM_SMTP_SERVER = "SMTP_SERVER"
+      	PARAM_SMTP_PORT = "SMTP_PORT"
+      	PARAM_SMTP_NAME = "SMTP_NAME"
+      	PARAM_SMTP_PASS = "SMTP_PASS"
+      	PARAM_SMTP_TLS = "SMTP_TLS"
+      	PARAM_SENDER_EMAIL = "EMAIL_SENDER"
+      	PARAM_URL_PUBLIC = "URL_PUBLIC"
+      	PARAM_URL_PROFILE_PAGE = "URL_PROFILE_PAGE"
+      	PARAM_URL_IDENTIFICATION_PAGE = "URL_IDENTIFICATION_PAGE"
+      	PARAM_URL_CONFIRMATION_PAGE = "URL_CONFIRMATION_PAGE"
+      	PARAM_URL_REINITIALIZATION_PAGE = "URL_REINITIALIZATION_PAGE"
+      	PARAM_URL_UNSUBSCRIPTION_PAGE = "URL_UNSUBSCRIPTION_PAGE"
+      	PARAM_SENDING_ENABLED = "SEND_ENABLED"
+      	IGNORE_DOUBLE_OPTIN = 1
+      	
+      	PARAM_NOTFOUND = "__NOTFOUND__"
+      
+      	// Outgoing parameters
+      	PARAM_NB_EMAILS_PASS 	= "NB_PASSING_EMAILS"		// Number of emails to send per pass
+      	PARAM_NB_ATEMPTS_EMAIL	= "NB_EMAIL_ATTEMPTS"		// Number of attempts to send an email
+      	PARAM_TIME_BETWEEN_ATTEMPT	= "TIME_BETWEEN_ATTEMPT"	// Time-out between 2 attempts (in seconds)
+      	
+      	ALGO_HASH = HA_SHA_160
+      	
+      END
+      
+      gaaParam is ASSOCIATIVE ARRAY of strings
+     type : 720896
+  procedures :
+   -
+     name : NL_ReadParam
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762134496859558
+     type_code : 15
+     code : |1-
+      // Summary: Reads a parameter of the global site configuration
+      // Syntax:
+      //[ <Result> = ] NL_ReadParam (<sParamName> is string [, <bReplaceSubParam> is boolean [, <sDefaultValue>]])
+      //
+      // Parameters:
+      //	sParamName (UNICODE string): Name of the parameter
+      //	bReplaceSubParam (boolean - default value=1): Indicates whether the sub-parameters must be managed
+      //	sDefaultValue (default value=""): <specify the role of sDefaultValue>
+      // Return value:
+      // 	UNICODE string: Value of the parameter
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_ReadParam( LOCAL sParamName is string, LOCAL bReplaceSubParam is boolean = True, sDefaultValue = "") : string
+      
+      HReadSeekFirst(NLConfiguration,ParamName,sParamName)
+      IF HFound() THEN
+      	sParamVal is string = NLConfiguration.ParamVal
+      	IF bReplaceSubParam THEN
+      		// Process of sub-parameters (a parameter can include anther one by using the syntax [[PARAM_NAME]]
+      		// This mechanism is used for the URLs of public pages
+      		nPosSubParamStart is int = Position(NLConfiguration.ParamVal,PREFIX_ATTR)
+      		nPosSubParamEnd is int = Position(NLConfiguration.ParamVal,SUFFIX_ATTR)
+      		IF nPosSubParamStart>0 AND nPosSubParamEnd>0 THEN
+      			// Replace the sub-parameter	
+      			sSubParamName is string = sParamVal[[nPosSubParamStart+2 TO nPosSubParamEnd-1]]
+      			sParamVal = Replace(sParamVal,PREFIX_ATTR+sSubParamName+SUFFIX_ATTR,NL_ReadParam(sSubParamName))
+      		END
+      	END
+      	
+      	RESULT sParamVal
+      END
+      
+      RESULT sDefaultValue
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT sDefaultValue
+     type : 458752
+   -
+     name : NL_WriteParam
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762134496925094
+     type_code : 15
+     code : |1+
+      // Summary: Modifies the value of a global site parameter
+      // Syntax:
+      //NL_WriteParam (<sParamName> is string, <sParamVal> is string)
+      //
+      // Parameters:
+      //	sParamName (UNICODE string): Name of the parameter
+      //	sParamValue (UNICODE string): Value of the parameter
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_WriteParam( LOCAL sParamName is string, LOCAL sParamVal is string ) 
+      
+      HReadSeekFirst(NLConfiguration,ParamName,sParamName,hLockWrite)
+      IF HFound() THEN
+      	NLConfiguration.ParamVal = sParamVal
+      	HModify(NLConfiguration)
+      ELSE
+      	HReset(NLConfiguration)
+      	NLConfiguration.ParamName = sParamName
+      	NLConfiguration.ParamVal = sParamVal
+      	HAdd(NLConfiguration)
+      END
+      
+      CASE Error:
+      ErrorPropagate()
+      
+     type : 458752
+   -
+     name : NL_ProcessDefaultError
+     procedure_id : 1412762134496990630
+     type_code : 15
+     code : |1-
+      // Summary: Default process of non-fatal errors
+      // Syntax:
+      // NL_ProcessDefaultError ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      Procedure NL_ProcessDefaultError()
+      
+      sMessage is string = "An internal error occurred."+CR+"The manager was informed."+CR+"Retry later."+CR
+      IF InTestMode() THEN
+      	sMessage += ErrorInfo(errFullDetails)
+      END
+      
+      Error(sMessage)
+     type : 458752
+   -
+     name : NL_ListMessageParam
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762134497056166
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_ListMessageParam ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	associative array: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_ListMessageParam() : ASSOCIATIVE ARRAY of strings
+      
+      IF gaaParam..Occurrence=0 THEN
+      	FOR EACH NLConfiguration WHERE Hidden = False
+      		gaaParam[NLConfiguration.ParamName] = ""
+      	END
+      	FOR EACH sVal, sKey of gaaParam
+      		sVal = NL_ReadParam(sKey)
+      	END
+      END
+      
+      RESULT gaaParam
+      
+      CASE Error:
+      	ErrorPropagate()
+      	DeleteAll(gaaParam)
+      	RESULT gaaParam
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241a546213
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

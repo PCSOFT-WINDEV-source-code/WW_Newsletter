@@ -1,0 +1,649 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : SET_NLEMAIL
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ab19a3cf02
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1-
+      CONSTANT
+      	EMAIL_HIGH_PRIORITY = 3
+      	EMAIL_MEDIUM_PRIORITY = 2
+      	EMAIL_LOW_PRIORITY = 1
+      	
+      	EMAIL_WITHOUT_LIST = 0
+      	EMAIL_WITHOUT_MESSAGE = 0
+      	EMAIL_WITHOUT_USER = 0
+      	
+      	EMAIL_STATUS_PENDING = 1
+      	EMAIL_STATUS_SENT = 2
+      	EMAIL_STATUS_ERROR = 3
+      	EMAIL_STATUS_ERROR_PROCESS = 4
+      END
+      
+      STQueueInfo is Structure
+      	nNLListID is 8-byte int
+      	sListName is string
+      	nNLMessageID is 8-byte int
+      	sMessageSubject is string
+      	arrNbMessage is array of 4 int
+      END
+     type : 720896
+  procedures :
+   -
+     name : NL_Email_AddMessageToSend
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887393538
+     type_code : 15
+     code : |1+
+      // Summary: Adds an email into the outgoing queue
+      // Syntax:
+      //NL_Email_AddMessageToSend (<cEmail> is Email, <nAssociatedListID> is 8-byte int, <nAssociatedMessageID> is 8-byte int, <nAssociatedUserID> is 8-byte int [, <nPriority> is int])
+      //
+      // Parameters:
+      //	cEmail (Email): Content of the email
+      //	nAssociatedListID (8-byte integer): NLList associated with this email (EMAIL_WITHOUT_LIST if no associated list)
+      //	nAssociatedMessageID (8-byte integer): NLMessage associated with this email (EMAIL_WITHOUT_MESSAGE if no associated list)
+      //	nAssociatedUserID (8-byte integer): User associated with this email (mandatory)
+      //	nPriority (integer - default value=2): Outgoing priority
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_AddMessageToSend( LOCAL cEmail is a Email, LOCAL nAssociatedListID is 8-byte int, LOCAL nAssociatedMessageID is 8-byte int, LOCAL nAssociatedUserID is 8-byte int, LOCAL nPriority is int = EMAIL_MEDIUM_PRIORITY)
+      
+      HReset(NLQueueElement)
+      NLQueueElement.NLListID = nAssociatedListID
+      NLQueueElement.NLMessageID = nAssociatedMessageID
+      NLQueueElement.NLUserID = nAssociatedUserID
+      NLQueueElement.Priority = nPriority
+      NLQueueElement.Attempts = 0
+      NLQueueElement.Status = EMAIL_STATUS_PENDING
+      NLQueueElement.OutgoingDateTime = NLMessage.OutgoingDateTime
+      
+      EmailBuildSource(cEmail)
+      NLQueueElement.EmailContent = cEmail..Source
+      
+      HAdd(NLQueueElement)
+      
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Email_SendPriorityEmails
+     internal_properties : CAAAAAgAAABzyh4b9ZmPLuB46P+c1uOXHUuPP6Vdo4GM5FgmPtb5mDd1n5SYtZsCaJ8LoVDNnFCIzqPGXmS3lWliWNDG40O0X3shdL5FmKF6yYRQ/mIJvsX+j7LDeyhjgpdcmCdS/saoBBP8qb724s8UkK4djDHAxc+q9S3525a4+7hblzBF2X1j+v0=
+     procedure_id : 1412762125887459074
+     type_code : 15
+     code : |1-
+      // Summary: Procedure for processing the outgoing queue of emails
+      // Syntax:
+      //NL_Email_SendPriorityEmails ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_SendPriorityEmails()
+      
+      // Starts the session
+      cSession is a EmailSMTPSession
+      cSession..ServerAddress = NL_ReadParam(PARAM_SMTP_SERVER)
+      cSession..Port = NL_ReadParam(PARAM_SMTP_PORT)
+      cSession..Name = NL_ReadParam(PARAM_SMTP_NAME)
+      cSession..Password = NL_ReadParam(PARAM_SMTP_PASS)
+      cSession..Option = (NL_ReadParam(PARAM_SMTP_TLS)=1) ? emailOptionSecuredTLS ELSE emailOptionDefault
+      
+      IF EmailStartSession(cSession) = False THEN
+      	NL_Log_Add("Unable to connect to the SMTP server",LOG_ERROR)
+      END
+      
+      QRY_FindEmail.pPriority = EMAIL_HIGH_PRIORITY
+      QRY_FindEmail.pStatus_ = EMAIL_STATUS_PENDING
+      
+      IF HExecuteQuery(QRY_FindEmail) = False THEN
+      	NL_Log_Add("Unable to connect to the SMTP server",LOG_ERROR)
+      END
+      
+      _SendLoop(cSession)
+      
+      // Closes the session
+      EmailCloseSession(cSession)
+      
+      CASE Error:
+      	NL_Log_Add("An error occurred while sending a priority email: "+ErrorInfo(),LOG_ERROR)
+      	
+     type : 458752
+   -
+     name : NL_Email_NbEmailStatus
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887524610
+     type_code : 15
+     code : |1-
+      // Summary: Counts the number of emails in a given status in the queue
+      // Syntax:
+      //[ <Result> = ] NL_Email_NbEmailsStatus (<nStatus> is int [, <nMessageID> is 8-byte int])
+      //
+      // Parameters:
+      //	nStatus (integer): Sought status
+      //	nMessageID (8-byte integer - default value=0): <specify the role of nMessageID>
+      // Return value:
+      // 	Undefined type: Number of emails
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_NbEmailStatus( LOCAL nStatus is int, LOCAL nMessageID is 8-byte int = 0 )
+      
+      IF nMessageID>0 THEN
+      	HExecuteQuery(QRY_CountEmailInStatus,hQueryDefault,nStatus,nMessageID)
+      ELSE
+      	HExecuteQuery(QRY_CountEmailInStatus,hQueryDefault,nStatus,Null)
+      END
+      
+      RESULT QRY_CountEmailInStatus.NbQueueElements
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT 0
+     type : 458752
+   -
+     name : NL_Email_SendEmails_Scheduled
+     internal_properties : CAAAAAgAAAAB1IopE2AseB/hw/ZfFULWcjSMLrZAVnDbvevR6XFPUuHrifZWNfkewBAmTRafnYg15IBlZpxDOPW3WcEFbOYJTUKiibA7by8hZ8v189UuUffLlHIBAQqdqsAMLlu+6Chy7sVKX88Zb6wtIemM/WgJDOahnnaglNF3Krf0LYLpfYnxCO8=
+     procedure_id : 1412762125887590146
+     type_code : 15
+     code : |1-
+      // Summary: Procedure for processing the outgoing queue of emails
+      // Syntax:
+      //NL_Email_SendEmails_Scheduled ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_SendEmails_Scheduled()
+      
+      _ProcessScheduling()
+      
+      // Check whether the sendings are active
+      IF NL_ReadParam(PARAM_SENDING_ENABLED,False,"0")="1" THEN
+      	// Effective sending
+      	_SendEmails()
+      END
+      
+      CASE Error:
+      	NL_Log_Add("An error occurred while sending an email: "+ErrorInfo(),LOG_ERROR)
+      	
+     type : 458752
+   -
+     name : _SendLoop
+     procedure_id : 1412762125887655682
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //_SendLoop (<cSession>)
+      //
+      // Parameters:
+      //	cSession: <specify the role of cSession>
+      // Return value:
+      // 	None
+      //
+      // Example:
+      // Indicate an example.
+      //
+      Procedure PRIVATE _SendLoop(cSession)
+      
+      
+      // Rebuild the email
+      cEmail is a Email
+      nNbSent is int
+      nNbSendingsPerPass is int 
+      nNbAttemptsPerEmail is int 
+      nNbTimeBetweenAttempts is int 
+      nNbAttempts is int 
+      
+      
+      nNbSendingsPerPass = NL_ReadParam(PARAM_NB_EMAILS_PASS,*,50)
+      nNbAttemptsPerEmail = NL_ReadParam(PARAM_NB_ATEMPTS_EMAIL,*,3)
+      nNbTimeBetweenAttempts = NL_ReadParam(PARAM_TIME_BETWEEN_ATTEMPT,*,3)
+      IF nNbSendingsPerPass = 0 THEN
+      	// If the number of sending is set to 0, take everything that must be sent
+      	nNbSendingsPerPass = HNbRec(QRY_FindEmail)
+      END
+      FOR EACH QRY_FindEmail 
+      
+      	HReadSeekFirst(NLQueueElement,NLQueueElementID,QRY_FindEmail.NLQueueElementID,hLockWrite)
+      	IF HFound(NLQueueElement) = False THEN
+      		NL_Log_Add(StringBuild("Unable to find the element to send (%1)",QRY_FindEmail.NLQueueElementID),LOG_WARNING)
+      		CONTINUE
+      	END
+      		
+      		
+      				
+      	// Import the source
+      	cEmail..Source = QRY_FindEmail.EmailContent
+      	
+      	IF EmailImportSource(cEmail) = False THEN
+      		NL_Log_Add("Unable to import the source of the email",LOG_ERROR)
+      		CONTINUE
+      	END
+      	
+      	cEmail..Message = cEmail..PlainText
+      	
+      	nNbAttempts = 0
+      	// Send (in loop for the number of attempts)
+      	LOOP
+      		
+      		IF EmailSendMessage(cSession,cEmail,emailOptionEncodeHeader) = False THEN
+      			nNbAttempts++
+      			
+      			// Wait a little bit
+      			ThreadPause(nNbTimeBetweenAttempts * 100)
+      			
+      		ELSE
+      			// Switch to sent
+      			NLQueueElement.Status = EMAIL_STATUS_SENT
+      			NLQueueElement.OutgoingDateTime = DateSys + TimeSys()
+      			NLQueueElement.Attempts = nNbAttempts
+      			
+      			BREAK
+      			
+      		END
+      		
+      		IF nNbAttempts > nNbAttemptsPerEmail THEN
+      			// Switch to sent
+      			NLQueueElement.Status = EMAIL_STATUS_ERROR
+      			NLQueueElement.Details = ErrorInfo(errFullDetails)
+      			NLQueueElement.OutgoingDateTime = DateSys + TimeSys()
+      			NLQueueElement.Attempts = nNbAttempts
+      			NL_Log_Add("Unable to send the email" + CR + CR + QRY_FindEmail.EmailContent,LOG_ERROR)
+      			BREAK
+      		END
+      		
+      	END
+      	
+      	// Modifying the element 
+      	IF HModify(NLQueueElement)	= False THEN
+      		NL_Log_Add(StringBuild("Unable to modify the <%1> element",QRY_FindEmail.NLQueueElementID)  + CR + CR + QRY_FindEmail.EmailContent,LOG_WARNING)
+      		dbgAssert(False)
+      	END
+      	
+      	// Retry during the next attempt
+      	IF nNbSent > nNbSendingsPerPass THEN
+      		BREAK
+      	END
+      	
+      		
+      	CONTINUE:
+      		nNbSent++	
+      END
+     type : 458752
+   -
+     name : NL_Email_ScheduledSending
+     internal_properties : CAAAAAgAAACa7ZUylPrkOq8bzKLNxSWRwPBZVPMXTvszDke5Z1JHfe9m3GIUVoYm1K1ZsqS74mlrm2P3BaXU46oqTRmvh5JSkC6LrEF2tXLHf3sI6xI/YOI9JxsuNcx/qC9SkPg7Edu/AkH5Mm3fj0GAusg7pMGkk+13wNM1PEx1phWu6Y4=
+     procedure_id : 1412762125887721218
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_Email_ScheduledSend ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      Procedure NL_Email_ScheduledSending()
+      
+      NL_Email_SendPriorityEmails()
+     type : 458752
+   -
+     name : NL_Email_GetQueueInfo
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887786754
+     type_code : 15
+     code : |1-
+      // Summary: Returns the status of pending queues
+      // Syntax:
+      //[ <Result> = ] NL_Email_GetQueueInfo ([<nFilterByNLList> is 8-byte int [, <nFilterByNLMessage> is 8-byte int]])
+      //
+      // Parameters:
+      //	nFilterByNLList (8-byte integer - default value=-1): Returns the information for a Newsletter only
+      //	nFilterByNLMessage (8-byte integer - default value=-1): Returns the information for an instance of Newsletter
+      // Return value:
+      // 	array: array of information
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_GetQueueInfo( LOCAL nFilterByNLList is 8-byte int = -1 , LOCAL nFilterByNLMessage is 8-byte int = -1 ) : array of STQueueInfo
+      
+      arrInfo is array of STQueueInfo
+      arrEmpty is array of STQueueInfo
+      
+      QRY_StatusOutgoingQueue.pNLList = (nFilterByNLList>0) ? nFilterByNLList ELSE Null
+      QRY_StatusOutgoingQueue.pNLMessage = (nFilterByNLMessage>0) ? nFilterByNLMessage ELSE Null
+      
+      HExecuteQuery(QRY_StatusOutgoingQueue)
+      
+      FOR EACH QRY_StatusOutgoingQueue 
+      	stInfo is STQueueInfo
+      	stInfo.nNLListID = QRY_StatusOutgoingQueue.NLListID
+      	stInfo.nNLMessageID = QRY_StatusOutgoingQueue.NLMessageID
+      	stInfo.sListName = QRY_StatusOutgoingQueue.Name
+      	stInfo.sMessageSubject = QRY_StatusOutgoingQueue.Topic
+      	stInfo.arrNbMessage[QRY_StatusOutgoingQueue.Status] = QRY_StatusOutgoingQueue.NbEmails
+      	Add(arrInfo,stInfo)
+      END
+      
+      RESULT arrInfo
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrEmpty
+     type : 458752
+   -
+     name : NL_Email_LastSending
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887852290
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Email_LastSend ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_LastSending()
+      
+      dFuture is date = DateSys()
+      dFuture..Day+=1
+      
+      HExecuteQuery(QRY_FindQueueByStatus,hQueryDefault,EMAIL_STATUS_SENT,Null,dFuture)
+      HReadLast(QRY_FindQueueByStatus)
+      
+      RESULT QRY_FindQueueByStatus.OutgoingDateTime
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_Email_NextSending
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887917826
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Email_NextSending ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_NextSending()
+      
+      HExecuteQuery(QRY_FindQueueByStatus,hQueryDefault,RPT_PROGRAM,DateSys(),Null)
+      HReadFirst(QRY_FindQueueByStatus)
+      
+      RESULT QRY_FindQueueByStatus.OutgoingDateTime
+      
+      CASE Error:
+      ErrorPropagate()
+      RESULT ""
+     type : 458752
+   -
+     name : _SendEmails
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125887983362
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //_SendEmails ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure PRIVATE _SendEmails()
+      
+      // Starts the session
+      cSession is a EmailSMTPSession
+      cSession..ServerAddress = NL_ReadParam(PARAM_SMTP_SERVER)
+      cSession..Port = NL_ReadParam(PARAM_SMTP_PORT)
+      cSession..Name = NL_ReadParam(PARAM_SMTP_NAME)
+      cSession..Password = NL_ReadParam(PARAM_SMTP_PASS)
+      cSession..Option = (NL_ReadParam(PARAM_SMTP_TLS)=1) ? emailOptionSecuredTLS ELSE emailOptionDefault
+      
+      IF EmailStartSession(cSession) = False THEN
+      	NL_Log_Add("Failure opening the SMTP session."+ErrorInfo(),LOG_ERROR)
+      	RETURN
+      END
+      
+      QRY_FindEmail.pPriority = EMAIL_MEDIUM_PRIORITY + ";" + EMAIL_LOW_PRIORITY
+      QRY_FindEmail.pStatus_ = EMAIL_STATUS_PENDING
+      
+      IF HExecuteQuery(QRY_FindEmail) = False THEN
+      	NL_Log_Add("Unable to connect to the SMTP server",LOG_ERROR)
+      	RETURN
+      END
+      
+      _SendLoop(cSession)
+      
+      // Closes the session
+      EmailCloseSession(cSession)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RETURN
+      	
+     type : 458752
+   -
+     name : NL_Email_SendEmails_Manual
+     internal_properties : CAAAAAgAAADoMxWSZil/3/Ae6qttAdUdJp1Nx3XLqs1Uiv7QNqLDevH7RNaXYzdC9U6YRgcF6LtbOpyocqfKQLzPgxoVR4zxWHDtX5Jugb5AVsgW+tYPAMa5xUA358yplZGfKns8WNGjojkmE5Qe0KHWxopLO3CNVlBDdQmxturewbbLmD+2SPJa4YY=
+     procedure_id : 1412762125888048898
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_Email_SendEmails_Manual ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_SendEmails_Manual()
+      
+      // Adds the outstanding schedulings
+      _ProcessScheduling()
+      
+      // Effective sending
+      _SendEmails()
+      
+      CASE Error:
+      NL_Log_Add("An error occurred while sending an email: "+ErrorInfo(),LOG_ERROR)
+     type : 458752
+   -
+     name : _ProcessScheduling
+     procedure_id : 1412762125888114434
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      // _ProcessScheduling ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      // _ProcessScheduling ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      Procedure PRIVATE _ProcessScheduling()
+      
+      dtNow is datetime
+      
+      // Switch the status from "Pending" to "In progress"
+      FOR EACH NLMessage WHERE StatusNL = RPT_PROGRAM
+      	IF NLMessage.OutgoingDateTime<dtNow THEN
+      		// The newsletter is currently sent
+      		NLMessage.StatusNL = RPT_SENDINGINPROGRESS
+      		HModify(NLMessage)
+      		// Generates the emails
+      		NL_GenerateQueueElements(NLMessage.NLMessageID)
+      	END
+      END
+      
+      // Switch the status from "In progress" to "Completed"
+      FOR EACH NLMessage WHERE StatusNL = RPT_SENDINGINPROGRESS
+      	IF NL_Email_NbEmailStatus(EMAIL_STATUS_PENDING,NLMessage.NLMessageID)=0 THEN
+      		NLMessage.StatusNL = STATUS_SENDINGOVER
+      		HModify(NLMessage)
+      	END
+      END
+     type : 458752
+   -
+     name : NL_Email_GetText
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125888179970
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Email_GetText (<nQueueElementID> is 8-byte int)
+      //
+      // Parameters:
+      //	nQueueElementID (8-byte integer): <specify the role of nQueueElementID>
+      // Return value:
+      // 	UNICODE string: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_GetText( LOCAL nQueueElementID is 8-byte int )
+      
+      HReadSeekFirst(NLQueueElement,NLQueueElementID,nQueueElementID)
+      
+      cEmail is a Email
+      cEmail..Source = NLQueueElement.EmailContent
+      EmailImportSource(cEmail)
+      
+      RESULT cEmail..PlainText
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_Email_GetHTML
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125888245506
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Email_GetHTML (<nQueueElementID> is 8-byte int)
+      //
+      // Parameters:
+      //	nQueueElementID (8-byte integer): <specify the role of COL_QueueElementID>
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Email_GetHTML(LOCAL nQueueElementID is 8-byte int )
+      
+      HReadSeekFirst(NLQueueElement,NLQueueElementID,nQueueElementID)
+      
+      cEmail is a Email
+      cEmail..Source = NLQueueElement.EmailContent
+      EmailImportSource(cEmail)
+      
+      RESULT cEmail..HTML
+      
+      
+      CASE Error:
+      ErrorPropagate()
+      RESULT ""
+      
+     type : 458752
+   -
+     name : NL_Email_StatusToText
+     procedure_id : 1412762125888311042
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Email_StatusToText (<nStatus> is int)
+      //
+      // Parameters:
+      //	nStatus (integer): <specify the role of nStatus>
+      // Return value:
+      // 	UNICODE string: // 	None
+      //
+      Procedure NL_Email_StatusToText( LOCAL nStatus_ is int )
+      
+      SWITCH nStatus_
+      	CASE EMAIL_STATUS_PENDING
+      		RESULT "Pending"				
+      	CASE EMAIL_STATUS_SENT
+      		RESULT "Sent"
+      	CASE EMAIL_STATUS_ERROR
+      		RESULT "Failed"
+      	CASE EMAIL_STATUS_ERROR_PROCESS
+      		RESULT "In error (processed)"
+      END
+      
+      ErrorThrow(1,"Unknown email status")
+      RESULT ""
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241ad36252
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

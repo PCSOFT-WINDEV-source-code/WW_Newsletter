@@ -1,0 +1,1544 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : SET_NLUSER
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ac1a7ad420
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1-
+      CONSTANT
+      	PAGEPARAM_EMAIL_CONFIRMATION = "email"
+      	PAGEPARAM_KEY_CONFIRMATION = "key"
+      	PAGEPARAM_LISTID = "nlid"
+      	PAGEPARAM_ATTACHID = "attid"
+      	PAGEPARAM_HEIGHT = "height"
+      	PAGEPARAM_WIDTH = "width"
+      	PAGEPARAM_OPENINGTOKEN = "tkn="
+      	
+      	PASSWORD_UNDEFINED = "*"
+      	
+      	// Attributes used by the site
+      	ATTR_PASSWORD = "PASSWORD"
+      	ATTR_TOKEN_REINITPASSWORD = "REINITPWD"
+      	ATTR_IP_SUBSCRIPTION = "IP_SUBSCRIPTION"
+      	ATTR_LASTNAME = "LASTNAME"
+      	ATTR_FIRSTNAME = "FIRSTNAME"
+      	ATTR_CIV = "CIV"
+      	ATTR_COMP = "COMP"
+      	ATTR_COUNTRY = "COUNTRY"
+      	ATTR_ADMIN = "ADMIN"
+      	ATTR_EMAIL =  "EMAIL"
+      	ATTR_TESTADDR = "TESTEMAIL"
+      	ATTR_SUBSCRIPTION_DATE = "DATE_SUBSCRIPTION"
+      	ATTR_KEY = "KEY"
+      	
+      	// Types of attributes
+      	ATTRTYPE_STRING = 1
+      	ATTRTYPE_INTEGER = 2
+      	ATTRTYPE_DATETIME = 3
+      	
+      	// Operators for the filters
+      	OP_EQUAL = 1
+      	OP_DIFFERENT = 2
+      	OP_GREATER = 3
+      	OP_GREATEREQUAL = 4
+      	OP_LESS = 5
+      	OP_LESSEQUAL = 6
+      	OP_STARTSWITH = 7
+      	OP_DOESNOTSTARTWITH = 8
+      	OP_ENDSSWITH = 9
+      	OP_DOESNOTENDWITH = 10
+      	
+      	// Maximum value of operators
+      	OP_MAX = 10
+      
+      	
+      	// Constant for salting passwords
+      	// CAUTION: if this value is modified, all the passwords must be reinitialized
+      	SALT_PWD_TXT = "jsuJB65dc&A=+lOobhj8_@mnb/tf*!"
+      END
+      
+      STValUserAttribute is Structure
+      	bUseDefault is boolean
+      	sValue is string
+      END
+      
+      STUserInfo is Structure
+      	NLUserID is 8-byte int
+      	Email is string
+      	aaAttribute is ASSOCIATIVE ARRAY of STValUserAttribute
+      END
+      
+      STAttributeInfo is Structure
+      	NLAttributeID is 8-byte int
+      	Name is string
+      	Type is int
+      	DefaultValue is string
+      	ListPossibleValues is string
+      	Description is string
+      	System is boolean
+      	Hidden is boolean
+      END
+      
+      
+      gbInitAttributeOK is boolean
+      gaaAttributesID is ASSOCIATIVE ARRAY of 8-byte int
+      gsConnectedUser is string
+      garrFilterOperator is array of string
+      _InitOperator()
+     type : 720896
+  procedures :
+   -
+     name : NL_User_ReadAttribute
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196452384
+     type_code : 15
+     code : |1+
+      // Summary: Reads the value of an attribute for a user
+      // Syntax:
+      //[ <Result> = ] NL_User_ReadAttribute (<sEmailAddress> is string, <sAttributeName> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Identifier of the user
+      //	sAttributeName (UNICODE string): Name of the attribute to read
+      // Return value:
+      // 	Undefined type: Type of the value associated with the value
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_ReadAttribute(LOCAL sEmailAddress is string, LOCAL sAttributeName is string)
+      
+      	// Searches for the user
+      	_FindUser(sEmailAddress)
+      	
+      	// Special case of EMAIL pseudo-attribute
+      	IF sAttributeName=ATTR_EMAIL THEN
+      		RESULT sEmailAddress
+      	END
+      
+      	// Finds the attribute
+      	_InitAttribute()
+      	nAttributeID is 8-byte int
+      	IF InAWPMode() THEN
+      		HReadSeekFirst(NLAttribute, name, sAttributeName)
+      		IF NOT HFound(NLAttribute) THEN
+      			ErrorThrow(1, "Attribute not found")
+      			RESULT ""
+      		END
+      		nAttributeID = NLAttribute.NLAttributeID
+      	ELSE
+      		nAttributeID = gaaAttributesID[sAttributeName]
+      	END
+      	
+      	// Finds the association between the attribute and the user
+      	HReadSeekFirst(NLUser_NLAttribute, UniquenessAttributePerUser, [nAttributeID, NLUser.NLUserID])
+      	IF HFound()=False THEN
+      		// No correspondence was found
+      		// Find the description of the attribute 
+      		HReadSeekFirst(NLAttribute,NLAttributeID,nAttributeID)
+      		IF HFound()=False THEN
+      			// The attribute does not exist (!)
+      			ErrorThrow(1, "Attribute not found")
+      			RESULT ""
+      		END
+      		// Returns the default value
+      		RESULT NLAttribute.DefaultValue		
+      	END
+      
+      	// Returns the value of the attribute
+      	RESULT NLUser_NLAttribute.Value
+      	
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_User_Add
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196517920
+     type_code : 15
+     code : |1-
+      // Summary: Adds a new user
+      // Syntax:
+      //NL_User_Add (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address to register
+      // Return value:
+      // 	None
+      //
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Add( LOCAL sEmailAddress is string )
+      
+      HReset(NLUser)
+      NLUser.Email = sEmailAddress
+      HAdd(NLUser)
+      
+      NL_List_InvalidCache(LIST_ALL)
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : NL_User_Exist
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196583456
+     type_code : 15
+     code : |1-
+      // Summary: Check the existence of a user
+      // Syntax:
+      //[ <Result> = ] NL_User_Exist (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address to find
+      // Return value:
+      // 	boolean: True if the user is already saved
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Exist( LOCAL sEmailAddress is string ) : boolean
+      
+      HReadSeekFirst(NLUser,Email,sEmailAddress)
+      
+      RESULT HFound()
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_User_AddSubscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196648992
+     type_code : 15
+     code : |1-
+      // Summary: Adds subscriptions for a user
+      // Syntax:
+      //NL_User_AddSubscriptions (<sEmailAddress> is string, <sSubscriptionList> is string [, <nOption> is int])
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Address of the user
+      //	sSubscriptionList (UNICODE string): List of NL to add (separated by ;)
+      //	nOption (integer - default value=0): Options (ex: ignore the double opt-in for the calls from the profile management)
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_AddSubscriptions( LOCAL sEmailAddress is string , LOCAL sSubscriptionList is string, LOCAL nOption is int = 0 )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Parameter of double opt-in (after registration, the user must click a link sent by email to validate its subscription)
+      bDoubleOptIn is boolean = Val(NL_ReadParam(PARAM_DOUBLE_OPT_IN)) _AND_ (BinaryAND(nOption,IGNORE_DOUBLE_OPTIN)=0)
+      
+      // Builds a confirmation key (for the double opt-in or for the unsubscribe operation)
+      sConfKey is string = _GenerateConfirmationKey()
+      
+      // Adds the subscriptions (if it does not already exist)
+      sListRealSubscriptions is string
+      FOR EACH string sNLID of sSubscriptionList SEPAREE by ";"
+      	IF NL_User_IsSubscriber(sEmailAddress,Val(sNLID))=False THEN
+      		NL_User_AddSubscription(NLUser.NLUserID,Val(sNLID),sConfKey,NOT bDoubleOptIn)
+      		// Creates the list of subscriptions actually added
+      		sListRealSubscriptions += [";"]+sNLID
+      	END
+      END
+      
+      // If subscriptions have been actually added and if the double opt-in is used, send the confirmation email
+      IF bDoubleOptIn THEN
+      	NL_User_GenerateDoubleOptInEmail(sEmailAddress,sListRealSubscriptions,sConfKey)
+      END
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_User_IsSubscriber
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196714528
+     type_code : 15
+     code : |1-
+      // Summary: Checks whether a user has already subscribed to a NL
+      // Syntax:
+      //[ <Result> = ] NL_User_HasSubscribed (<sEmailAddress> is ANSI string, <nListID> is 8-byte int)
+      //
+      // Parameters:
+      //	sEmailAddress (ANSI string): Email address of the user
+      //	nListID (8-byte integer): Identifier of the list
+      // Return value:
+      // 	boolean: True if the user has subscribed
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_IsSubscriber( LOCAL sEmailAddress is string ANSI, LOCAL nListID is 8-byte int )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Finds the subscription
+      HReadSeekFirst(NLUser_NLList,UniquenessUserPerList,[NLUser.NLUserID,nListID])
+      RESULT HFound()
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_User_GenerateDoubleOptInEmail
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196780064
+     type_code : 15
+     code : |1-
+      // Summary: Generates the double opt-in email for a set of subscriptions and places it in the queue
+      // Syntax:
+      //NL_User_GenerateDoubleOptInEmail (<sEmailAddress> is string, <sSubscriptionList> is string, <sConfirmationKey>)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Registered email address
+      //	sSubscriptionList (UNICODE string): List of IDs of subscribed NLs, separated by ";"
+      // 	sConfirmationKey: Confirmation key
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_GenerateDoubleOptInEmail(LOCAL sEmailAddress is string , LOCAL sSubscriptionList is string, LOCAL sConfirmationKey )
+      
+      sNAMELIST is string
+      FOR EACH string sNLID of sSubscriptionList SEPAREE by ";"
+      	HReadSeekFirst(NLList,NLListID,Val(sNLID))
+      	IF HFound() THEN
+      		sNAMELIST += [CR]+"* "+NLList.Name
+      	END
+      END
+      
+      cEmail is a Email
+      cEmail..Sender = NL_ReadParam(PARAM_SENDER_EMAIL)
+      cEmail..Recipient[1] = sEmailAddress
+      cEmail..Subject = "Confirmation of your subscription"
+      cEmail..Message = StringBuild([
+      Hello,
+      	
+      I'm the robot for managing the newsletters of %1
+      I've received a subscription request for the email address %2 to the following newsletters: 
+      %3
+      
+      If you made this request, click the link below to confirm it and to receive the newsletters:
+      %4?%5=%6&%7=%8
+      
+      If you didn't make this request, ignore this message.
+      
+      Best regards.
+      ],NL_ReadParam(PARAM_SITE_NAME),sEmailAddress,sNAMELIST,NL_ReadParam(PARAM_URL_CONFIRMATION_PAGE),PAGEPARAM_EMAIL_CONFIRMATION,sEmailAddress,PAGEPARAM_KEY_CONFIRMATION,sConfirmationKey)
+      
+      NL_Email_AddMessageToSend(cEmail,EMAIL_WITHOUT_LIST,EMAIL_WITHOUT_MESSAGE,NLUser.NLUserID,EMAIL_HIGH_PRIORITY)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_User_ConfirmSubscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196845600
+     type_code : 15
+     code : |1-
+      // Summary: Confirms the subscriptions of a user (if the double opt-in is used, the user does not receive any email as long as his subscription is not confirmed)
+      // Syntax:
+      //NL_User_ConfirmSubscriptions (<sEmailAddress> is string, <sKey> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address of the user
+      //	sKey (UNICODE string): Confirmation key
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_ConfirmSubscriptions( LOCAL sEmailAddress is string , LOCAL sKey is string )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Finds the subscriptions to confirm and switches them to confirmed
+      HReadSeekFirst(NLUser_NLList,NLUserConfirmationKeyID,[NLUser.NLUserID,sKey],hLockWrite)
+      WHILE HFound() _AND_ NOT HOut()
+      	NLUser_NLList.IsConfirmed = True
+      	// Generates a new token, it will be used for the unsubscribe link
+      	NLUser_NLList.ConfirmationKey = _GenerateConfirmationKey()
+      	HModify(NLUser_NLList)
+      	HReadNext(NLUser_NLList,NLUserConfirmationKeyID,hLockWrite)
+      END
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : _FindUser
+     procedure_id : 1412762130196911136
+     type_code : 15
+     code : |1-
+      // Summary: Positions the user file on a given address
+      // Syntax:
+      //_FindUser (<sEmailAddress>)
+      //
+      // Parameters:
+      //	sEmailAddress: Sought address
+      // Return value:
+      // 	None
+      //
+      Procedure PRIVATE _FindUser(sEmailAddress)
+      
+      IF NLUser.Email<>sEmailAddress THEN
+      	HReadSeekFirst(NLUser,Email,sEmailAddress)
+      	IF HFound()=False THEN
+      		ErrorThrow(1,StringBuild("The sought user (%1) does not exist.",sEmailAddress))
+      	END
+      END
+     type : 458752
+   -
+     name : NL_User_SubscriptionList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130196976672
+     type_code : 15
+     code : |1-
+      // Summary: Lists the NLs to which a user has subscribed
+      // Syntax:
+      //[ <Result> = ] NL_User_ListSubscriptions (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Address of the user
+      // Return value:
+      // 	UNICODE string: List of NLs in the following format ID + TAB + Name
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_SubscriptionList( LOCAL sEmailAddress is string ) : string
+      
+      sListNL is string
+      HExecuteQuery(QRY_UserSubscriptions,hQueryDefault,sEmailAddress)
+      FOR EACH QRY_UserSubscriptions 
+      	sListNL += [CR] + QRY_UserSubscriptions.NLListID + TAB + QRY_UserSubscriptions.Name
+      END
+      
+      RESULT sListNL
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_User_WriteAttribute
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197042208
+     type_code : 15
+     code : |1+
+      // Summary: Modifies the value of an attribute for a user
+      // Syntax:
+      //NL_User_WriteAttribute (<sEmailAddress> is string, <sAttributeName> is string, <sAttributeVal> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Identifier of the user
+      //	sAttributeName (UNICODE string): Name of the attribute to read
+      //	sAttributeVal (UNICODE string): New value of the attribute for the user
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_WriteAttribute(LOCAL sEmailAddress is string, LOCAL sAttributeName is string, LOCAL sAttributeVal is string )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Special case of EMAIL pseudo-attribute
+      IF sAttributeName=ATTR_EMAIL THEN
+      	HReadSeekFirst(NLUser,Email,sEmailAddress,hLockWrite)
+      	NLUser.Email = sAttributeVal
+      	HModify(NLUser)
+      	RETURN
+      END
+      
+      // Finds the attribute
+      _InitAttribute()
+      nAttributeID is 8-byte int
+      IF InAWPMode() THEN
+      	HReadSeekFirst(NLAttribute, name, sAttributeName)
+      	IF NOT HFound(NLAttribute) THEN
+      		ErrorThrow(1, "Attribute not found")
+      		RETURN
+      	END
+      	nAttributeID = NLAttribute.NLAttributeID
+      ELSE
+      	nAttributeID = gaaAttributesID[sAttributeName]
+      END
+      
+      // Finds out whether the association between the attribute and the user exists
+      HReadSeekFirst(NLUser_NLAttribute, UniquenessAttributePerUser, [nAttributeID, NLUser.NLUserID],hLockWrite)
+      IF HFound()=False THEN
+      	// Finds the attribute
+      	HReadSeekFirst(NLAttribute, name, sAttributeName)
+      	IF NOT HFound(NLAttribute) THEN
+      		ErrorThrow(1, "Attribute not found")
+      		RETURN
+      	END
+      	// Creates the association between the attribute and the user
+      	HReset(NLUser_NLAttribute)
+      	NLUser_NLAttribute.NLUserID = NLUser.NLUserID
+      	NLUser_NLAttribute.NLAttributeID = nAttributeID
+      	NLUser_NLAttribute.Value = sAttributeVal
+      	HAdd(NLUser_NLAttribute)
+      ELSE
+      	NLUser_NLAttribute.Value = sAttributeVal
+      	HModify(NLUser_NLAttribute)
+      END	
+      	
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : _InitAttribute
+     procedure_id : 1412762130197107744
+     type_code : 15
+     code : |1-
+      // Summary: Initialize the set of procedures
+      // Syntax:
+      //_InitAttribute ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      Procedure PRIVATE _InitAttribute()
+      
+      IF InAWPMode() THEN
+      	DeclareAWPContext(gbInitAttributeOK)
+      END	
+      
+      IF gbInitAttributeOK=False THEN
+      	// Check the mandatory attributes
+      	_CheckExistenceSystemAttribute(ATTR_PASSWORD,"Password",ATTRTYPE_STRING,PASSWORD_UNDEFINED,"",True)
+      	_CheckExistenceSystemAttribute(ATTR_TOKEN_REINITPASSWORD,"Token for reinitializing passwords",ATTRTYPE_STRING,"","",True)
+      	_CheckExistenceSystemAttribute(ATTR_IP_SUBSCRIPTION,"Subscription IP address",ATTRTYPE_STRING,"","",True)
+      	_CheckExistenceSystemAttribute(ATTR_ADMIN,"Administrator",ATTRTYPE_INTEGER,0,"",True)
+      	_CheckExistenceSystemAttribute(ATTR_TESTADDR,"Test email address",ATTRTYPE_INTEGER,0,"",True)
+      	
+      	_CheckExistenceSystemAttribute(ATTR_LASTNAME,"LastName",ATTRTYPE_STRING,"","",False)
+      	_CheckExistenceSystemAttribute(ATTR_FIRSTNAME,"FirstName",ATTRTYPE_STRING,"","",False)
+      	_CheckExistenceSystemAttribute(ATTR_CIV,"Title",ATTRTYPE_STRING,"","",False)
+      	_CheckExistenceSystemAttribute(ATTR_COMP,"Company",ATTRTYPE_STRING,"","",False)
+      	_CheckExistenceSystemAttribute(ATTR_COUNTRY,"Country (ISO code)",ATTRTYPE_STRING,"","",False)
+      	
+      	// Build the cache of attribute IDs
+      	FOR EACH NLAttribute 
+      		gaaAttributesID[NLAttribute.Name] = NLAttribute.NLAttributeID
+      	END
+      	gbInitAttributeOK = True
+      END
+     type : 458752
+   -
+     name : _CheckExistenceSystemAttribute
+     procedure_id : 1412762130197173280
+     type_code : 15
+     code : |1+
+      // Summary: Checks whether an attribute is found in the file of attributes (some attributes are mandatory in order for the site to operate properly)
+      // Syntax:
+      //_CheckExistenceSystemAttribute (<sAttrName> is string, <sAttrDesc> is string, <nAttrType> is int, <sDefaultVal> is string, <sValList> is string, <bHidden> is boolean)
+      //
+      // Parameters:
+      //	sAttrName (UNICODE string): Name of the attribute
+      //	sAttrDesc (UNICODE string): Description of the attribute
+      //	nAttrType (integer): Type of the attribute
+      //	sDefaultVal (UNICODE string): Default value
+      //	sValList (UNICODE string): List of possibles values (optional, separated by CR)
+      //	bHidden (boolean): <specify the role of bHidden>
+      // Return value:
+      // 	None
+      //
+      //	bIsRequired (boolean): True if the attribute is mandatory
+      Procedure PRIVATE _CheckExistenceSystemAttribute(LOCAL sAttrName is string, LOCAL sAttrDesc is string, LOCAL nAttrType is int, LOCAL sDefaultVal is string, LOCAL sValList is string , bHidden is boolean )
+      
+      HReadSeekFirst(NLAttribute,name,sAttrName)
+      IF HFound()=False THEN
+      	HReset(NLAttribute)
+      	NLAttribute.name = sAttrName
+      	NLAttribute.Description = sAttrDesc
+      	NLAttribute.Type = nAttrType
+      	NLAttribute.DefaultValue = sDefaultVal
+      	NLAttribute.ListPossibleValues = sValList
+      	NLAttribute.System = True
+      	NLAttribute.Hidden = bHidden
+      	HAdd(NLAttribute)
+      END
+      
+     type : 458752
+   -
+     name : NL_User_CreatePassword
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197238816
+     type_code : 15
+     code : |1-
+      // Summary: Creates a new password for a user
+      // Syntax:
+      //[ <Result> = ] NL_User_CreatePassword (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address of the user
+      // Return value:
+      // 	UNICODE string: new password
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_CreatePassword(LOCAL sEmailAddress is string) : string
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Generates the password and saves its hash in the attribute of the user
+      sPassword is string = GeneratePassword(SIZE_PASSWORD)
+      NL_User_WriteAttribute(sEmailAddress,ATTR_PASSWORD,_HashPass(sPassword))
+      
+      // Returns the password
+      RESULT sPassword
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+      	
+     type : 458752
+   -
+     name : NL_User_Connection
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197304352
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_Connection (<sEmailAddress> is string, <sPassword> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address
+      //	sPassword (UNICODE string): Password
+      // Return value:
+      // 	boolean: True if the connection was successful
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Connection(LOCAL sEmailAddress is string,LOCAL sPassword is string) : boolean
+      
+      // Checks the existence of the user
+      IF NL_User_Exist(sEmailAddress)=False THEN
+      	RESULT False
+      END
+      
+      // Hashes the password and compares it to the one stored in the database
+      sHashPwd is string = _HashPass(sPassword)
+      IF (NL_User_ReadAttribute(sEmailAddress,ATTR_PASSWORD)=sHashPwd) THEN
+      	DeclareAWPContext(gsConnectedUser)
+      	gsConnectedUser = sEmailAddress
+      	RESULT True
+      END
+      
+      RESULT False
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : _HashPass
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197369888
+     type_code : 15
+     code : |1-
+      // Summary: Procedure for hashing passwords
+      // Syntax:
+      //[ <Result> = ] _HashPass (<sPassword> is string)
+      //
+      // Parameters:
+      //	sPassword (UNICODE string): Password in clear
+      // Automatic Process of Errors:   run the block of code CASE ERROR
+      //
+      
+      // Return value:
+      // 	UNICODE string: Hashed password
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      procedure RESTREint _HashPass( local sPassword is string ) : string 
+      
+      RESULT BufferToHexa(HashString(HA_HMAC_TIGER_192,sPassword+SALT_PWD_TXT),4,24)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_User_Connected
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197435424
+     type_code : 15
+     code : |1-
+      // Summary: Returns the connected user (empty string if there is none)
+      // Syntax:
+      //[ <Result> = ] NL_User_Connected ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	UNICODE string: True if a user is connected
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Connected()
+      
+      IF InAWPMode() THEN
+      	DeclareAWPContext(gsConnectedUser)
+      END
+      
+      RESULT gsConnectedUser
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_User_Disconnection
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197500960
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_Disconnection ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	boolean: True if the connection was successful
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      //	sEmailAddress (UNICODE string): Email address
+      //	sPassword (UNICODE string): Password
+      Procedure NL_User_Disconnection()
+      
+      gsConnectedUser = ""
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_User_GenerateEmailPasswordReinitialization
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197566496
+     type_code : 15
+     code : |1+
+      // Summary: Generates an email to reinitialize a password
+      // Syntax:
+      //NL_User_GenerateEmailPasswordReinitialization (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_GenerateEmailPasswordReinitialization(LOCAL sEmailAddress is string)
+      
+      // Generates a reinitialization token (included in the link of the email to prevent from accessing to the page)
+      sTokenReinit is string = _GenerateConfirmationKey()
+      NL_User_WriteAttribute(sEmailAddress,ATTR_TOKEN_REINITPASSWORD,sTokenReinit)
+      
+      cEmail is a Email
+      cEmail..Sender = NL_ReadParam(PARAM_SENDER_EMAIL)
+      cEmail..Recipient[1] = sEmailAddress
+      cEmail..Subject = "Reinitializing the password"
+      cEmail..Message = StringBuild([
+      Hello,
+      	
+      I'm the robot for managing the newsletters of %1
+      I've received a request for reinitializing the password of the email address %2.
+      
+      If you made this request, click the link below to access the reinitialization page:
+      %3?%4=%5&%6=%7
+      
+      If you didn't make this request, ignore this message.
+      
+      Best regards.
+      ],NL_ReadParam(PARAM_SITE_NAME),sEmailAddress,NL_ReadParam(PARAM_URL_REINITIALIZATION_PAGE),PAGEPARAM_EMAIL_CONFIRMATION,sEmailAddress,PAGEPARAM_KEY_CONFIRMATION,sTokenReinit)
+      
+      NL_Email_AddMessageToSend(cEmail,EMAIL_WITHOUT_LIST,EMAIL_WITHOUT_MESSAGE,NLUser.NLUserID,EMAIL_HIGH_PRIORITY)
+      
+      CASE Error:
+      	ErrorPropagate()
+      
+     type : 458752
+   -
+     name : NL_User_ChangePassword
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197632032
+     type_code : 15
+     code : |1-
+      // Summary: Changes the password of a user
+      // Syntax:
+      //NL_User_ChangePassword (<sEmailAddress> is string, <sPassword> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address
+      //	sPassword (UNICODE string): New password
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_ChangePassword(LOCAL sEmailAddress is string, LOCAL sPassword is string)
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Generates the password and saves its hash in the attribute of the user
+      NL_User_WriteAttribute(sEmailAddress,ATTR_PASSWORD,_HashPass(sPassword))
+      
+      CASE Error:
+      ErrorPropagate()
+     type : 458752
+   -
+     name : NL_User_Unsubscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197697568
+     type_code : 15
+     code : |1-
+      // Summary: Unsubscribes a user from one or more NL
+      // Syntax:
+      //NL_User_Unsubscriptions (<sEmailAddress> is string, <sUnsubscriptionList> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Address of the user
+      //	sUnsubscriptionList (UNICODE string): List of NL to delete (separated by ;)
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Unsubscriptions( LOCAL sEmailAddress is string , LOCAL sUnsubscriptionList is string )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Deletes the subscriptions
+      FOR EACH string sNLID of sUnsubscriptionList SEPAREE by ";"
+      	IF NL_User_IsSubscriber(sEmailAddress,Val(sNLID)) THEN
+      		HDelete(NLUser_NLList)
+      	END
+      END
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RETURN
+     type : 458752
+   -
+     name : _GenerateConfirmationKey
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197763104
+     type_code : 15
+     code : |1-
+      // Summary: Generates a confirmation key, this key is sent by email after a subscription to check whether the user exists ans whether he wants to subscribe
+      // Syntax:
+      //[ <Result> = ] _GenerateConfirmationKey ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      //	UNICODE string: Confirmation key
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure _GenerateConfirmationKey()
+      
+      sKey is string
+      LOOP (SIZE_CONFIRMATION_KEY)
+      	sKey += Charact(64+Random(1,26))
+      END
+      
+      RESULT sKey
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_User_CheckKey
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197828640
+     type_code : 15
+     code : |1-
+      // Summary: Checks the key of a user for a list
+      // Syntax:
+      //[ <Result> = ] NL_User_CheckKey (<sEmailAddress> is string, <nListID> is 8-byte int, <sKey> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address
+      //	nListID (8-byte integer): ID of the list
+      //	sKey (UNICODE string): Associated key
+      // Return value:
+      // 	boolean: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_CheckKey( LOCAL sEmailAddress is string, LOCAL nListID is 8-byte int, LOCAL sKey is string )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Finds the subscription
+      HReadSeekFirst(NLUser_NLList,UniquenessUserPerList,[NLUser.NLUserID,nListID])
+      IF HFound() THEN
+      	RESULT sKey=NLUser_NLList.ConfirmationKey
+      END
+      
+      RESULT False
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_User_DoubleOptIn
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130197894176
+     type_code : 15
+     code : |1-
+      // Summary: Sends the emails for double opt-in
+      // Syntax:
+      //NL_User_DoubleOptIn (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Email address
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_DoubleOptIn( LOCAL sEmailAddress is string )
+      
+      // Searches for the user
+      _FindUser(sEmailAddress)
+      
+      // Builds a new confirmation key
+      sConfKey is string = _GenerateConfirmationKey()
+      
+      sListRealSubscriptions is string
+      HReadSeekFirst(NLUser_NLList,NLUserID,NLUser.NLUserID,hLockWrite)
+      WHILE HFound() _AND_ NOT HOut()
+      	IF NLUser_NLList.IsConfirmed=False THEN
+      		NLUser_NLList.ConfirmationKey = sConfKey
+      		HModify(NLUser_NLList)
+      		// Creates the list of reinitialized subscriptions
+      		sListRealSubscriptions += [";"]+NLUser_NLList.NLListID
+      	ELSE
+      		HUnlockRecNum(NLUser_NLList,hCurrentRecNum)
+      	END
+      	HReadNext(NLUser_NLList,NLUserID,hLockWrite)
+      END
+      
+      // If subscriptions have been actually added and if the double opt-in is used, send the confirmation email
+      NL_User_GenerateDoubleOptInEmail(sEmailAddress,sListRealSubscriptions,sConfKey)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : _InitOperator
+     procedure_id : 1412762130197959712
+     type_code : 15
+     code : |1+
+      // Summary: Initializes the global array of filter operators
+      // Syntax:
+      // _InitOperator ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	None
+      //
+      Procedure PRIVATE _InitOperator()
+      
+      IF InAWPMode() THEN RETURN
+      
+      dbgAssert(garrFilterOperator..Occurrence=0)
+      
+      Add(garrFilterOperator,"equal to") // OP_EQUAL = 1
+      Add(garrFilterOperator,"different from") // OP_DIFFERENT = 2
+      Add(garrFilterOperator,"greater than") // OP_GREATER = 3
+      Add(garrFilterOperator,"greater than or equal to") // OP_GREATEREQUAL = 4
+      Add(garrFilterOperator,"less than") // OP_LESS = 5
+      Add(garrFilterOperator,"less than or equal to") // OP_LESSEQUAL = 6
+      Add(garrFilterOperator,"starts with") // OP_STARTSWITH = 7
+      Add(garrFilterOperator,"does not start with") // OP_DOESNOTSTARTWITH = 8
+      Add(garrFilterOperator,"ends with") // OP_ENDSWITH = 9
+      Add(garrFilterOperator,"does not end with") // OP_DOESNOTENDWITH = 10
+      
+      dbgAssert(garrFilterOperator..Occurrence=OP_MAX)
+      
+     type : 458752
+   -
+     name : NL_User_AddSubscription
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198025248
+     type_code : 15
+     code : |1-
+      // Summary: Adds a user into a list
+      // Syntax:
+      //NL_User_AddSubscription (<nUserID> is 8-byte int, <nListID> is 8-byte int, <sConfKey> is string, <bIsConfirmed> is boolean)
+      //
+      // Parameters:
+      //	nUserID (8-byte integer): Identifier of the user
+      //	nListID (8-byte integer): Identifier of the list
+      //	sConfKey (UNICODE string): Confirmation/Unsubscription key
+      //	bIsConfirmed (boolean): True if the subscription is confirmed
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_AddSubscription( LOCAL nForumUserID is 8-byte int, LOCAL nListID is 8-byte int, LOCAL sConfKey is string, LOCAL bIsConfirmed is boolean)
+      
+      HReset(NLUser_NLList)
+      
+      NLUser_NLList.NLListID = nListID
+      NLUser_NLList.NLUserID = nForumUserID
+      NLUser_NLList.ConfirmationKey = sConfKey
+      NLUser_NLList.IsConfirmed = bIsConfirmed
+      
+      HAdd(NLUser_NLList)	
+      
+      NL_List_InvalidCache(nListID)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_User_ReadInfo
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198090784
+     type_code : 15
+     code : |1-
+      // Summary: Returns the user information
+      // Syntax:
+      //[ <Result> = ] NL_User_ReadInfo (<nUserID> is 8-byte int)
+      //
+      // Parameters:
+      //	nUserID (8-byte integer): Identifier of the user
+      // Return value:
+      //	STUserInfo: User information
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_ReadInfo( LOCAL nForumUserID is 8-byte int )
+      
+      stEmptyInfo is STUserInfo
+      stInfo is STUserInfo
+      
+      HReadSeekFirst(NLUser,NLUserID,nForumUserID)
+      IF HFound()=False THEN
+      	ErrorThrow(1,"The user does not exist.")
+      	RESULT stEmptyInfo
+      END
+      
+      FileToMemory(stInfo,NLUser)
+      
+      // Build the array of attributes with the default values
+      FOR EACH NLAttribute 
+      	stAttr is STValUserAttribute
+      	stAttr.sValue = NLAttribute.DefaultValue
+      	stAttr.bUseDefault = True
+      	stInfo.aaAttribute[NLAttribute.Name] = stAttr
+      END
+      
+      // Fill with the attributes specified for the user
+      HExecuteQuery(QRY_UserAttribute,hQueryDefault,nForumUserID)
+      FOR EACH QRY_UserAttribute 
+      	stInfo.aaAttribute[QRY_UserAttribute.Name].sValue = QRY_UserAttribute.Value
+      	stInfo.aaAttribute[QRY_UserAttribute.Name].bUseDefault = False
+      END
+      
+      RESULT stInfo
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT stEmptyInfo
+     type : 458752
+   -
+     name : NL_User_CheckCriterion
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198156320
+     type_code : 15
+     code : |1-
+      // Summary: Checks whether a user matches a criterion
+      // Syntax:
+      //[ <Result> = ] NL_User_CheckCriterion (<stUsr> is STUserInfo, <stFilter> is STFilterLine)
+      //
+      // Parameters:
+      //	stUsr (STUserInfo): <specify the role of stUsr>
+      //	stFilter (STFilterLine): <sepcify the role of stFilter>
+      // Return value:
+      // 	boolean: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_CheckCriterion(LOCAL stUsr is STUserInfo,LOCAL stFilter is STFilterLine)
+      
+      // Finds the value of criterion 1
+      sVal1 is string = NL_User_ReadAttribute(stUsr.Email,stFilter.sCriteria1)
+      
+      // Finds the value of criterion 2
+      sVal2 is string = (stFilter.nCriterionType2=CRITERION_VALUE) ? stFilter.sCriteria2 ELSE NL_User_ReadAttribute(stUsr.Email,stFilter.sCriteria2)
+      
+      SWITCH stFilter.nOperator
+      	CASE OP_EQUAL
+      		RESULT sVal1=sVal2
+      	CASE OP_DIFFERENT
+      		RESULT sVal1<>sVal2
+      	CASE OP_GREATER
+      		RESULT sVal1>sVal2
+      	CASE OP_GREATEREQUAL
+      		RESULT sVal1>=sVal2
+      	CASE OP_LESS
+      		RESULT sVal1<sVal2
+      	CASE OP_LESSEQUAL
+      		RESULT sVal1<=sVal2
+      	CASE OP_STARTSWITH
+      		RESULT sVal1[=sVal2
+      	CASE OP_DOESNOTSTARTWITH
+      		RESULT NOT (sVal1[=sVal2)
+      	CASE OP_ENDSSWITH
+      		RESULT Right(sVal1,Length(sVal2))=sVal2
+      	CASE OP_DOESNOTENDWITH
+      		RESULT Right(sVal1,Length(sVal2))<>sVal2
+      		
+      
+      	OTHER CASE
+      		dbgAssert(False,"Unknown filter operator")
+      		ErrorThrow(1,"Unknown filtering operator")
+      		RESULT False
+      END
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT False
+     type : 458752
+   -
+     name : NL_Attribute_LoadList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198221856
+     type_code : 15
+     code : |1-
+      // Summary: Returns the list of attributes
+      // Syntax:
+      //[ <Result> = ] NL_Attribute_LoadList ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	array: List of attributes
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attribute_LoadList() : array of STAttributeInfo
+      
+      arrAttrList is array of STAttributeInfo
+      
+      FileToArray(arrAttrList,NLAttribute,name)
+      
+      RESULT arrAttrList
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrAttrList
+     type : 458752
+   -
+     name : NL_Attribute_Read
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198287392
+     type_code : 15
+     code : |1-
+      // Summary: Reads the information about an attribute
+      // Syntax:
+      //[ <Result> = ] NL_Attribute_Read (<nAttrID> is 8-byte int)
+      //
+      // Parameters:
+      //	nAttrID (8-byte integer): Identifier of the attribute
+      // Return value:
+      // 	STAttributeInfo: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attribute_Read(LOCAL nAttrID is 8-byte int) : STAttributeInfo
+      
+      stAttr is STAttributeInfo
+      
+      HReadSeekFirst(NLAttribute,NLAttributeID,nAttrID)
+      
+      FileToMemory(stAttr,NLAttribute)
+      
+      RESULT stAttr
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT stAttr
+     type : 458752
+   -
+     name : NL_Attribute_Modify
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198352928
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //NL_Attribute_Modify (<stAttr> is STAttributeInfo)
+      //
+      // Parameters:
+      //	stAttr (STAttributeInfo): <specify the role of stAttr>
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attribute_Modify( LOCAL stAttr is STAttributeInfo )
+      
+      HReadSeekFirst(NLAttribute,NLAttributeID,stAttr.NLAttributeID,hLockWrite)
+      
+      MemoryToFile(stAttr,NLAttribute)
+      
+      HModify(NLAttribute)
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_Attribute_Create
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198418464
+     type_code : 15
+     code : |1+
+      // Summary: Creates a new attribute
+      // Syntax:
+      //NL_Attribute_Create (<stAttr> is STAttributeInfo)
+      //
+      // Parameters:
+      //	stAttr (STAttributeInfo): description of the attribute
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attribute_Create(LOCAL stAttr is STAttributeInfo )
+      
+      HReset(NLAttribute)
+      
+      MemoryToFile(stAttr,NLAttribute)
+      
+      HAdd(NLAttribute)
+      
+      
+      CASE Error:
+      ErrorPropagate()
+      
+     type : 458752
+   -
+     name : NL_User_Delete
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198484000
+     type_code : 15
+     code : |1-
+      // Summary: Deletes a user (deletes the attributes as well as the subscriptions to the NL and dissociates the emails sent)
+      // Syntax:
+      //NL_User_Delete (<nUserID> is 8-byte int)
+      //
+      // Parameters:
+      //	nUserID (8-byte integer): Identifier of the user
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Delete( LOCAL nUserID is 8-byte int )
+      
+      FOR EACH NLUser_NLList WHERE NLUserID = nUserID
+      	NL_List_InvalidCache(NLUser_NLList.NLListID)
+      END
+      NL_List_InvalidCache(LIST_ALL)
+      
+      HReadSeekFirst(NLUser,NLUserID,nUserID,hLockReadWrite)
+      HDelete(NLUser)
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_User_SearchByAttribute
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198549536
+     type_code : 15
+     code : |1-
+      // Summary: Returns the list of users matching an attribute
+      // Syntax:
+      //[ <Result> = ] NL_User_FindByAttribute (<sAttName> is string, <sSearchVal> is string)
+      //
+      // Parameters:
+      //	sAttName (UNICODE string): Name of the attribute
+      //	sSearchVal (UNICODE string): Value of the attribute
+      // Return value:
+      // 	array: List of users
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_SearchByAttribute( LOCAL sAttName is string, LOCAL sSearchVal is string ) : array of STUserInfo
+      
+      arrUsr is array of STUserInfo
+      
+      HExecuteQuery(QRY_FindUserByAttribute,hQueryDefault,sAttName,sSearchVal)
+      FileToArray(arrUsr,QRY_FindUserByAttribute)
+      
+      RESULT arrUsr
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrUsr
+     type : 458752
+   -
+     name : NL_User_GenerateTestEmail
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198615072
+     type_code : 15
+     code : |1-
+      // Summary: Sends a test email to an address
+      // Syntax:
+      //NL_User_GenerateTestEmail (<sEmailAddress> is string)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): Recipient address
+      // Return value:
+      // 	None
+      //
+      // 	SET_Email: <specify the role of SET_Email>// Automatic process of errors:   run the CASE ERROR block
+      //
+      
+      Procedure NL_User_GenerateTestEmail(LOCAL sEmailAddress is string)
+      
+      _FindUser(sEmailAddress)
+      
+      cEmail is a Email
+      cEmail..Sender = NL_ReadParam(PARAM_SENDER_EMAIL)
+      cEmail..Recipient[1] = sEmailAddress
+      cEmail..Subject = "Test message"
+      cEmail..Message = StringBuild([
+      	Hello,
+      	
+      	I'm the robot for managing the newsletters of %1
+      	This is a test mail.
+      	The address %2 was added to the list of test emails for the newsletters.
+      		
+      	Best regards.
+      ],NL_ReadParam(PARAM_SITE_NAME),sEmailAddress)
+      
+      NL_Email_AddMessageToSend(cEmail,EMAIL_WITHOUT_LIST,EMAIL_WITHOUT_MESSAGE,NLUser.NLUserID,EMAIL_HIGH_PRIORITY)
+      
+      CASE Error:
+      ErrorPropagate()
+     type : 458752
+   -
+     name : NL_User_Account
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198680608
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_Account ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	integer: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_Account() : int
+      
+      RESULT HNbRec(NLUser)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT 0
+     type : 458752
+   -
+     name : NL_User_DateLastSubscriber
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198746144
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_DateLastSubscriber ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	Undefined type: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_DateLastSubscriber()
+      
+      HExecuteQuery(QRY_FindAttribute,hQueryDefault,ATTR_SUBSCRIPTION_DATE)
+      HReadLast(QRY_FindAttribute,Value)
+      
+      IF HNbRec(QRY_FindAttribute)>0 THEN
+      	RESULT QRY_FindAttribute.Value
+      END
+      
+      RESULT DateSys()
+      
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT DateSys()
+     type : 458752
+   -
+     name : NL_User_AttributeList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198811680
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_ListAttributes (<sEmailAddress> is string, <nNLID> is 8-byte int)
+      //
+      // Parameters:
+      //	sEmailAddress (UNICODE string): <specify the role of nUserID>
+      //	nNLID (8-byte integer): <specify the role of nNLID>
+      // Return value:
+      // 	associative array: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_AttributeList( LOCAL sEmailAddress is string, LOCAL nNLID is 8-byte int ) : ASSOCIATIVE ARRAY of strings
+      
+      // Lists the attributes
+      aaAttr is ASSOCIATIVE ARRAY of strings
+      FOR EACH NLAttribute 
+      	aaAttr[NLAttribute.Name] = NL_User_ReadAttribute(sEmailAddress,NLAttribute.Name)
+      END
+      
+      // Adds the email
+      aaAttr[ATTR_EMAIL] = sEmailAddress
+      
+      // Adds the attributes of the list
+      HReadSeekFirst(NLUser_NLList,UniquenessUserPerList,[NLUser.NLUserID,nNLID])
+      aaAttr[ATTR_KEY] = NLUser_NLList.ConfirmationKey
+      
+      
+      RESULT aaAttr
+      
+      CASE Error:
+      	ErrorPropagate()
+      	DeleteAll(aaAttr)
+      	RESULT aaAttr
+     type : 458752
+   -
+     name : NL_User_DefaultProfile
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762130198877216
+     type_code : 15
+     code : |1-
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_User_DefaultProfile ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	STUserInfo: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_User_DefaultProfile() : STUserInfo
+      
+      stDefaultUsr is STUserInfo
+      
+      stDefaultUsr.Email = ""
+      stDefaultUsr.NLUserID = -1
+      
+      // Build the array of attributes with the default values
+      FOR EACH NLAttribute 
+      	stAttr is STValUserAttribute
+      	stAttr.sValue = NLAttribute.DefaultValue
+      	stAttr.bUseDefault = True
+      	stDefaultUsr.aaAttribute[NLAttribute.Name] = stAttr
+      END
+      
+      stDefaultUsr.aaAttribute[ATTR_PASSWORD].bUseDefault = False
+      stDefaultUsr.aaAttribute[ATTR_PASSWORD].sValue = _HashPass("")
+      
+      stDefaultUsr.aaAttribute[ATTR_IP_SUBSCRIPTION].bUseDefault = False
+      stDefaultUsr.aaAttribute[ATTR_IP_SUBSCRIPTION].sValue = BrowserIPAddress()
+      
+      stDefaultUsr.aaAttribute[ATTR_ADMIN].bUseDefault = False
+      stDefaultUsr.aaAttribute[ATTR_ADMIN].sValue = False
+      
+      stDefaultUsr.aaAttribute[ATTR_TESTADDR].bUseDefault = False
+      stDefaultUsr.aaAttribute[ATTR_TESTADDR].sValue = False
+      
+      stDefaultUsr.aaAttribute[ATTR_SUBSCRIPTION_DATE].bUseDefault = False
+      stDefaultUsr.aaAttribute[ATTR_SUBSCRIPTION_DATE].sValue = DateSys()
+      
+      stKeyAttr is STValUserAttribute
+      stKeyAttr.bUseDefault = False
+      stKeyAttr.sValue = _GenerateConfirmationKey()
+      stDefaultUsr.aaAttribute[ATTR_KEY] = stKeyAttr
+      
+      RESULT stDefaultUsr
+      
+      CASE Error:
+      	ErrorPropagate()
+      	VariableReset(stDefaultUsr)
+      	RESULT stDefaultUsr
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241b346271
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

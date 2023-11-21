@@ -1,0 +1,164 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : SET_BRW_TOOLS
+ major_version : 28
+ minor_version : 0
+ type : 65539
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ad1adbd6fd
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 41
+  p_codes :
+   -
+     type : 983040
+     role : N
+   -
+     type : 983042
+     role : N
+  procedures :
+   -
+     name : RunDelayed
+     internal_properties : CAAAAAgAAAAmOwvM278cD98kfyKEkAPJdG6IzjdBndvbyrhL4KnrUzXE5HquffM0xo31OqqwkxhoM1ED7tgaoWkiSWGki87yovGmFBG6
+     procedure_id : 1412762134497777405
+     type_code : 15
+     code : |1-
+      // Summary: Runs a browser WLanguage procedure in delayed mode
+      // Syntax:
+      //RunDelayed (<pProcedure> [, <nTimeout> is int])
+      //
+      // Parameters:
+      //	pProcedure: Name of the procedure
+      // 	nTimeout (integer - default value=0): Time-out in hundredths of a second
+      // Return value:
+      // 	None
+      //
+      Procedure RunDelayed(pProcedure, LOCAL nTimeout is int = 0)
+      
+      	EXTERN setTimeout
+      	
+      	// Runs in delayed mode
+      	setTimeout(pProcedure, (nTimeout * 10))
+     type : 458752
+     role : N
+   -
+     name : JQCaretInsertion
+     internal_properties : CAAAAAgAAAAF5R0O++D/MuHow/kGYOuT0eNjaFsrP+fl/EtIxGw+1/qBu/mSVbccIlVAkTog58BiOZRWbAz3zCFg6spmIQ==
+     procedure_id : 1412762134497842941
+     type_code : 15
+     code : |1+
+      function JQCaretInsertion(elt, text) {
+      	// Retrieves the JQuery element
+      	var jqelt = $(elt);
+      	
+      	// If the element is not found
+      	if (jqelt.length === 0 || jqelt.is(":hidden")) {
+      		return;
+      	}
+      	
+      	// Retrieves the selection via createRange
+      	if (document.selection && document.selection.createRange) {
+      		jqelt.focus();
+      		var sel = document.selection.createRange();
+      		// Inserts the text
+      		sel.text = text;
+      		jqelt.focus();
+      		
+      		// Retrieves the selection via selectionStart/End
+      	} else if (jqelt[0].selectionStart || jqelt[0].selectionStart === 0) {
+      		var startPos = jqelt[0].selectionStart;
+      		var endPos = jqelt[0].selectionEnd;
+      		var scrollTop = jqelt.scrollTop();
+      		// Inserts the text
+      		jqelt[0].value = jqelt[0].value.substring(0, startPos) + text + jqelt[0].value.substring(endPos, jqelt[0].value.length);
+      		// Gives focus back
+      		jqelt.focus();
+      		// Restores the selection
+      		jqelt[0].selectionStart = startPos + text.length;
+      		jqelt[0].selectionEnd = startPos + text.length;
+      		// Repositions
+      		if (scrollTop != 0) jqelt.scrollTop(scrollTop);
+      	} else {
+      		// Adds the text
+      		jqelt[0].value += text;
+      		jqelt.focus();
+      	}
+      }
+     language : JS
+     type : 458752
+     role : N
+   -
+     name : JQCaret
+     internal_properties : CAAAAAgAAABULUFOgo1vSIRGKM04OZK7keRH7NWuFkhEQd0K4PHVTQefdr0vEAlPBjfOQLOBL9gX/V0KpxXjTKxX0w==
+     procedure_id : 1412762134497908477
+     type_code : 15
+     code : |1+
+      function JQCaret(elt, begin, end) {
+      	var range;
+      	
+      	// Retrieves the JQuery element
+      	var jqelt = $(elt);
+      	
+      	// If the element is not found
+      	if (jqelt.length === 0 || jqelt.is(":hidden")) {
+      		return;
+      	}
+      	
+      	// If JQCaret(<control>, <position> [, <position>]) was called
+      	if (typeof begin == 'number') {
+      		
+      		// Defines the end position
+      		end = (typeof end === 'number') ? end : begin;
+      		
+      		// On each occurrence of the element
+      		return jqelt.each(function() {
+      			
+      			// Applies the selection via setSelectionRange
+      			if (jqelt[0].setSelectionRange) {
+      				jqelt[0].setSelectionRange(begin, end);
+      				
+      				// Applies the selection via createTextRange
+      			} else if (jqelt[0].createTextRange) {
+      				range = jqelt[0].createTextRange();
+      				range.collapse(true);
+      				range.moveEnd('character', end);
+      				range.moveStart('character', begin);
+      				range.select();
+      			}
+      		});
+      		
+      		// If JQCaret(<control>) was called
+      	} else {
+      		// Retrieves the selection via setSelectionRange
+      		if (jqelt[0].setSelectionRange) {
+      			begin = jqelt[0].selectionStart;
+      			end = jqelt[0].selectionEnd;
+      			
+      			// Retrieves the selection via createRange
+      		} else if (document.selection && document.selection.createRange) {
+      			range = document.selection.createRange();
+      			begin = 0 - range.duplicate().moveStart('character', -100000);
+      			end = begin + range.text.length;
+      		}
+      		
+      		// Builds an object {begin: <start>, end: <end>}
+      		return { begin: begin, end: end };
+      	}
+      }
+     language : JS
+     type : 458752
+     role : N
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : NAV_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241bc062a0
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

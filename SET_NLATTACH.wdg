@@ -1,0 +1,392 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : SET_NLATTACH
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x139b23ab1988cec3
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      CONSTANT
+      	ATTACH_NAME_FACEBOOK_ID = "FACEBOOK_ID"
+      	ATTACH_NAME_TWITTER_ID = "TWITTER_ID"
+      	ATTACHE_NAME_GOOGLE_PLUS_ID = "GOOGLE_PLUS_ID"
+      END
+      
+      STFamilyInfo is Structure
+      	Family is string
+      END
+      
+      STAttachInfo is Structure
+      	NLAttachID is 8-byte int
+      	name is string
+      	Type is string
+      	Description is string
+      	Size is int
+      	Family is string 
+      	Content is buffer
+      END
+     type : 720896
+  procedures :
+   -
+     name : NL_Attach_FamilyList
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885624003
+     type_code : 15
+     code : |1-
+      // Summary: Lists of attachment families
+      // Syntax:
+      //[ <Result> = ] NL_Attach_FamilyList ()
+      //
+      // Parameters:
+      //	None
+      // Return value:
+      // 	array: List of families
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_FamilyList() : array of STFamilyInfo
+      
+      arrFamily is array of STFamilyInfo
+      
+      HExecuteQuery(QRY_ListAttachFamily)
+      
+      FileToArray(arrFamily,QRY_ListAttachFamily,Family)
+      
+      RESULT arrFamily
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrFamily
+     type : 458752
+   -
+     name : NL_Attach_Add
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885689539
+     type_code : 15
+     code : |1+
+      // Summary: Adds a new attachment
+      // Syntax:
+      //NL_Attach_Add (<stAttach> is STAttachInfo)
+      //
+      // Parameters:
+      //	stAttach (STAttachInfo): <specify the role of stAttach>
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_Add( LOCAL stAttache is STAttachInfo)
+      
+      HReset(NLAttach)
+      
+      MemoryToFile(stAttache,NLAttach)
+      
+      // Calculate the hash
+      NLAttach.Hash = HashString(ALGO_HASH,stAttache.Content)
+      
+      HAdd(NLAttach)
+      
+      CASE Error:
+      ErrorPropagate()
+     type : 458752
+   -
+     name : NL_Attach_ListByFamily
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885755075
+     type_code : 15
+     code : |1-
+      // Summary: Returns the list of attachments for a family
+      // Syntax:
+      //[ <Result> = ] NL_Attach_ListByFamily (<sFamily> is string [, <bWithContent> is boolean])
+      //
+      // Parameters:
+      //	sFamily (UNICODE string): Name of the family (empty string for all the attachments)
+      //	bWithContent (boolean - default value=0): Indicates whether the function must return the content of the image
+      // Return value:
+      // 	array: array of attachments
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_ListByFamily( LOCAL sFamily is string , LOCAL bWithContent is boolean = False )
+      
+      arrAttache is array of STAttachInfo
+      arrEmptyAttach is array of STAttachInfo
+      
+      FOR EACH NLAttach WHERE Family [= sFamily
+      	stAttache is STAttachInfo
+      	
+      	FileToMemory(stAttache,NLAttach)
+      	IF bWithContent=False THEN stAttache.Content = ""
+      	
+      	Add(arrAttache,stAttache)
+      END
+      
+      RESULT arrAttache
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT arrEmptyAttach
+     type : 458752
+   -
+     name : NL_Attach_Read
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885820611
+     type_code : 15
+     code : |1-
+      // Summary: Reads the information about an attachment
+      // Syntax:
+      //[ <Result> = ] NL_Attach_Read (<nAttachID> is 8-byte int)
+      //
+      // Parameters:
+      //	nAttachID (8-byte integer): <specify the role of nAttachID>
+      // Return value:
+      // 	STAttachInfo: // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_Read( LOCAL nAttID is 8-byte int ) : STAttachInfo
+      
+      stInfo is STAttachInfo
+      
+      IF nAttID>0 THEN
+      	HReadSeekFirst(NLAttach,NLAttachID,nAttID)
+      	FileToMemory(stInfo,NLAttach)
+      ELSE
+      	stInfo.Content = fLoadBuffer(CompleteDir(fExeDir())+"defaultimg.png")
+      	stInfo.Description = "default image"
+      	stInfo.NLAttachID = 0
+      	stInfo.Type = "image/png"
+      	stInfo.Size = fSize(CompleteDir(fExeDir())+"defaultimg.png")
+      END
+      
+      RESULT stInfo
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT stInfo
+     type : 458752
+   -
+     name : NL_Attach_Delete
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885886147
+     type_code : 15
+     code : |1+
+      // Summary: Deletes an attachment
+      // Syntax:
+      //NL_Attach_Delete (<nAttachID> is 8-byte int)
+      //
+      // Parameters:
+      //	nAttachID (8-byte integer): Identifier
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_Delete( LOCAL nAttID is 8-byte int )
+      
+      HReadSeekFirst(NLAttach,NLAttachID,nAttID,hLockWrite)
+      IF HFound(NLAttach)=False THEN
+      	ErrorThrow(1,"Attachment not found")
+      	RETURN
+      END
+      
+      HDelete(NLAttach)
+      
+      CASE Error:
+      	ErrorPropagate()
+     type : 458752
+   -
+     name : NL_GenerateAttachURL
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125885951683
+     type_code : 15
+     code : |1-
+      // Summary: Generates the URL for accessing an attachment
+      // Syntax:
+      //[ <Result> = ] NL_GenerateURLAttach (<nAttachID> is 8-byte int, <nWidth> is int, <nHeight> is int, <sToken> is string)
+      //
+      // Parameters:
+      //	nAttachID (8-byte integer): Identifier in NLAttach
+      //	nWidth (integer): Width to generate
+      //	nHeight (integer): Height to generate
+      //	sToken (UNICODE string): Opening token in NLAttachInstance
+      // Return value:
+      // 	UNICODE string: URL
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_GenerateAttachURL( LOCAL nAttID is 8-byte int, LOCAL nWidth is int, LOCAL nHeight is int, LOCAL sToken is string )
+      
+      sAddressPreviewPage is string = PageAddress(viewimage,paFULL)
+      
+      sURL is string = sAddressPreviewPage+"?"+PAGEPARAM_ATTACHID+"="+nAttID+"&"+PAGEPARAM_WIDTH+"="+nWidth+"&"+PAGEPARAM_HEIGHT+"="+nHeight
+      IF sToken<>"" THEN
+      	sURL += "&"+PAGEPARAM_OPENINGTOKEN+"="+sToken
+      END
+      
+      RESULT sURL
+      
+      CASE Error:
+      	ErrorPropagate()
+      	RESULT ""
+     type : 458752
+   -
+     name : NL_Attach_Modify
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125886017219
+     type_code : 15
+     code : |1-
+      // Summary: Modifies the properties of an attachment
+      // Syntax:
+      //NL_Attach_Modify (<stAttach> is STAttachInfo)
+      //
+      // Parameters:
+      //	stAttach (STAttachInfo): New parameters
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_Modify( LOCAL stAttache is STAttachInfo )
+      
+      HReadSeekFirst(NLAttach,NLAttachID,stAttache.NLAttachID,hLockWrite)
+      IF HFound()=False THEN
+      	ErrorThrow(1,"Attachment not found")
+      	RETURN
+      END
+      
+      MemoryToFile(stAttache,NLAttach)
+      
+      HModify(NLAttach)
+      
+      CASE Error:
+      	ErrorPropagate()
+      	
+     type : 458752
+   -
+     name : NL_Attach_Build
+     procedure_id : 1412762125886082755
+     type_code : 15
+     code : |1-
+      // Summary: Loads and resizes an attachment
+      // Syntax:
+      //[ <Result> = ] NL_Attach_Build (<nAttID> is 8-byte int, <nWidth> is int, <nHeight> is 8-byte int)
+      //
+      // Parameters:
+      //	nAttID (8-byte integer): ID of the attachment
+      //	nWidth (integer): Width
+      //	nHeight (8-byte integer): Height (if width and height are set to 0, the attachment is returned as it is)
+      // Return value:
+      // 	STAttachInfo: Attachment
+      //
+      Procedure NL_Attach_Build( LOCAL nIDAtt is 8-byte int, LOCAL nWidth is int, LOCAL nHeight is 8-byte int) : STAttachInfo
+      
+      stAttache is STAttachInfo = NL_Attach_Read(nIDAtt)
+      
+      // If dimensions have been specified, the image must be resized (otherwise, it is sent at 100%)
+      IF nWidth>0 _OR_ nHeight>0 THEN
+      	imgResize is a Image = stAttache.Content
+      	dResize(imgResize,nWidth,nHeight,drHomotheticCentered)
+      	stAttache.Type = "image/png"
+      	stAttache.Content = imgResize..Image
+      END
+      
+      RESULT stAttache
+     type : 458752
+   -
+     name : NL_Attach_OpeningNote
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125886148291
+     type_code : 15
+     code : |1-
+      // Summary: Counts an opening
+      // Syntax:
+      //NL_Attach_OpeningNote (<sOpeningToken> is string)
+      //
+      // Parameters:
+      //	sOpeningToken (UNICODE string): opening token
+      // Return value:
+      // 	None
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_OpeningNote( LOCAL sOpeningToken is string )
+      
+      HReadSeekFirst(NLInstanceAttach,OpeningToken,sOpeningToken,hLockWrite)
+      IF HFound()=False THEN
+      	NL_Log_Add("An opening token that does not exist was called: "+sOpeningToken,LOG_WARNING)
+      	RETURN
+      END
+      
+      // If the opening was already counted
+      IF NLInstanceAttach.OpeningDetected=True THEN
+      	HUnlockRecNum(NLInstanceAttach,hCurrentRecNum)
+      	RETURN
+      END
+      
+      // Fills the opening
+      NLInstanceAttach.OpeningDetected = True
+      NLInstanceAttach.IPOpening = BrowserIPAddress()
+      NLInstanceAttach.OpeningDateTime = Now()
+      
+      HModify(NLInstanceAttach)
+      
+      CASE Error:
+      	// Special case: this function does not propagate the errors that occur but it saves them in the log
+      	NL_Log_Add("Error in NL_Attach_OpeningNote: "+ErrorInfo(errFullDetails),LOG_ERROR)
+      	
+     type : 458752
+   -
+     name : NL_Attach_FindIDByName
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1412762125886213827
+     type_code : 15
+     code : |1+
+      // Summary: <specify the action of the procedure>
+      // Syntax:
+      //[ <Result> = ] NL_Attach_FindIDByName (<sName> is string)
+      //
+      // Parameters:
+      //	sName (UNICODE string): <specify the role of sName>
+      // Return value:
+      // 	8-byte integer: // 	None
+      //
+      // Example:
+      // Indicate an example.
+      //// Automatic process of errors:   run the block of code CASE ERROR
+      //
+      
+      Procedure NL_Attach_FindIDByName( LOCAL sName is string ) : 8-byte int
+      
+      IF HReadSeekFirst(NLAttach,name,sName) THEN
+      	RESULT NLAttach.NLAttachID
+      END
+      
+      ErrorThrow(1,"Attachment not found")
+      RESULT 0
+      
+      
+      CASE Error:
+      ErrorPropagate()
+      RESULT 0
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x100699241a726233
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
